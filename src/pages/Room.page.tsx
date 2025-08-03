@@ -30,6 +30,7 @@ export default function RoomPage() {
   // Fetch booking details using bookingId and phoneNumber
 
   useEffect(() => {
+    const start = Date.now();
     if (!bookingId || !phoneNumber) return;
 
     axios
@@ -43,7 +44,13 @@ export default function RoomPage() {
         console.log("Booking data fetched:", response.data.data);
         const data = response.data.data;
         setBooking(data);
-        setLoading(false);
+        const duration = Date.now() - start;
+        const remaining = 1500 - duration;
+        if (remaining > 0) {
+          setTimeout(() => setLoading(false), remaining);
+        } else {
+          setLoading(false);
+        }
 
         if (roomNumberId) {
           const room = data.BookingRoom.find(
