@@ -83,7 +83,7 @@ export default function GuestChatBot() {
 
     const extras: QuickReply[] = [
       {
-        label: "🏠 Home",
+        label: "Home",
         icon: UI_ICON.home,
         onClick: () => {
           setCategoryIndex(null);
@@ -93,7 +93,7 @@ export default function GuestChatBot() {
         },
       },
       {
-        label: "🆘 Didn’t find what I need",
+        label: "Didn’t find what I need",
         icon: UI_ICON.help,
         onClick: () =>
           botSend(
@@ -220,27 +220,29 @@ export default function GuestChatBot() {
    * Render
    * --------------------------------------------------------------*/
   return (
-    <div className="h-[100dvh] pb-[env(safe-area-inset-bottom)]">
-      <Card className="mx-auto w-full max-w-md border-none bg-transparent rounded-none min-h-screen">
-        <CardContent
-          className="relative flex h-full flex-col p-4  
-    bg-black/70 backdrop-blur-sm ring-1 lg:ring-0 ring-white/10 rounded-none min-h-screen w-full"
-        >
-          {/* bottom glow */}
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-40 
+    <div>
+      <Header />
+      <div className="h-[100dvh] pt-20">
+        <Card className="mx-auto w-full max-w-md border-none bg-transparent rounded-none min-h-screen ">
+          <CardContent
+            className=" flex h-full flex-col 
+    bg-black/70 backdrop-blur-sm  rounded-none min-h-screen w-full px-2"
+          >
+            {/* bottom glow */}
+            <div
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-40 
       rounded-none bg-gradient-to-t from-violet-700/30 via-transparent to-transparent"
-          />
-          <Header />
+            />
 
-          {/* 🗨 Chat area */}
-          <ChatWindow
-            messages={messages}
-            quickReplies={quickReplies}
-            isTyping={isTyping}
-          />
-        </CardContent>
-      </Card>
+            {/* 🗨 Chat area */}
+            <ChatWindow
+              messages={messages}
+              quickReplies={quickReplies}
+              isTyping={isTyping}
+            />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

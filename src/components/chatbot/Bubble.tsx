@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import ChatAvatar from "./Avatar";
+import TypingIndicator from "./TypingIndicator";
 
 export default function Bubble({
   sender,
@@ -9,6 +10,18 @@ export default function Bubble({
   text: string;
 }) {
   const isGuest = sender === "guest";
+
+  // 👉 Handle typing as a dedicated branch (no tail, no text)
+  if (sender === "typing") {
+    return (
+      <div className="flex w-full gap-2 items-center justify-start">
+        <ChatAvatar sender="bot" />
+        <div className="max-w-[75%] rounded-2xl px-3 py-2 text-sm shadow-md bg-muted text-foreground">
+          <TypingIndicator />
+        </div>
+      </div>
+    );
+  }
   return (
     <div
       className={cn(
@@ -17,8 +30,9 @@ export default function Bubble({
       )}
     >
       {sender === "bot" && <ChatAvatar sender="bot" />}
-      {sender === "typing" && <ChatAvatar sender="bot" />}
+
       {/* {sender === "bot" && <ChatAvatar sender="typing" />} */}
+
       <span
         className={cn(
           "relative max-w-[75%] rounded-2xl p-3 text-sm leading-relaxed shadow-md whitespace-pre-line",
