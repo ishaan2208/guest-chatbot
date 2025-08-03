@@ -103,8 +103,8 @@ export default function Login() {
   }
 
   return (
-    <div className="flex items-center justify-center h-screen bg-black">
-      <div className="max-w-md  p-6 flex flex-col items-center justify-center rounded-lg shadow-md w-full">
+    <div className="flex items-start justify-center h-screen bg-black">
+      <div className="max-w-md  p-6 flex flex-col items-center justify-start rounded-lg shadow-md w-full">
         <img className="h-52 w-52" src="/Zenvana logo.svg" alt="Zenvana Logo" />
         <h1 className="text-xl font-bold mb-6 text-center">Login</h1>
         <Form {...form}>
