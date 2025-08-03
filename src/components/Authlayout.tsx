@@ -1,5 +1,3 @@
-import type { size } from "zod";
-import { Button } from "./ui/button";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -10,19 +8,13 @@ export default function AuthLayout({
 }) {
   // Function to clear localStorage and redirect to login page
   const navigate = useNavigate();
-  const emptyLocalStorage = () => {
-    localStorage.removeItem("bookingId");
-    localStorage.removeItem("phoneNumber");
-    localStorage.removeItem("roomNumber");
-    // Redirect to login page
-    navigate("/login");
-  };
 
   // Check localStorage for bookingId ,phoneNumber on component mount
   useEffect(() => {
     //check localStorage for bookingId and phoneNumber
     const bookingId = localStorage.getItem("bookingId");
     const phoneNumber = localStorage.getItem("phoneNumber");
+    const roomNumber = localStorage.getItem("roomNumberId");
 
     console.log("Booking ID:", bookingId);
     console.log("Phone Number:", phoneNumber);
@@ -30,7 +22,11 @@ export default function AuthLayout({
     if (bookingId && phoneNumber) {
       console.log("Booking found, proceeding to room page.");
       // If bookingId and phoneNumber are present, proceed to room page
-      navigate("/room");
+      if (roomNumber) {
+        navigate("/room/chatbot");
+      } else {
+        navigate("/room");
+      }
     } else {
       console.log("No booking found, redirecting to login page.");
       navigate("/login");
@@ -39,11 +35,6 @@ export default function AuthLayout({
 
   return (
     <div className="">
-      <div>
-        <Button onClick={emptyLocalStorage} size={"sm"}>
-          Clear Booking Data
-        </Button>
-      </div>
       <div> {children}</div>
     </div>
   );

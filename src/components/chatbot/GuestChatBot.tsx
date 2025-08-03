@@ -3,9 +3,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import ChatWindow from "./ChatWindow";
 import Header from "./Header";
 // 🔑  Ensure the file name matches exactly → guestService.ts (NO typo!)
-import { guestServiceMenu } from "@/constants/guetsService";
+import { useGuestServiceMenu } from "@/constants/guetsService";
 import type { GuestServiceItem } from "@/constants/guetsService";
 import type { QuickReply } from "./QuickReplies";
+import { useRecoilValue } from "recoil";
+import { bookingAtom } from "@/store/booking.recoil";
+import { Capitalize } from "@/lib/Capitalize";
 
 /** ----------------------------------------------------------------
  * 📨 Local message shape
@@ -19,6 +22,7 @@ interface Message {
  * 🚀 GuestChatBot – root UI component
  * ----------------------------------------------------------------*/
 export default function GuestChatBot() {
+  const guestServiceMenu = useGuestServiceMenu();
   // 💬 Message timeline
   const [messages, setMessages] = useState<Message[]>([]);
   // 🔘 Inline quick‑reply chips
@@ -26,6 +30,7 @@ export default function GuestChatBot() {
   // 🧭 Navigation state
   const [categoryIndex, setCategoryIndex] = useState<number | null>(null);
   const [isTyping, setIsTyping] = useState(false);
+  const booking = useRecoilValue(bookingAtom);
 
   const botSend = (text: string, delay = 2000) => {
     setIsTyping(true);
@@ -124,24 +129,24 @@ export default function GuestChatBot() {
   const getFeaturedItems = (): GuestServiceItem[] =>
     guestServiceMenu.flatMap((cat) => cat.items.filter((i) => i.featured));
 
-  const buildFeaturedReplies = (): QuickReply[] => {
-    console.log("Building featured replies");
-    const replies = getFeaturedItems().map((item) => ({
-      label: item.isChargeable ? `${item.label} 💰` : item.label,
-      onClick: () => handleItem(item),
-    }));
-    return [
-      ...replies,
-      {
-        label: "📂 Browse all options",
-        onClick: () => {
-          setQuickReplies(buildCategoriesReplies());
-          push({ sender: "guest", text: "Browse categories" });
-          botSend("Choose a category below 👇");
-        },
-      },
-    ] as QuickReply[];
-  };
+  // const buildFeaturedReplies = (): QuickReply[] => {
+  //   console.log("Building featured replies");
+  //   const replies = getFeaturedItems().map((item) => ({
+  //     label: item.isChargeable ? `${item.label} 💰` : item.label,
+  //     onClick: () => handleItem(item),
+  //   }));
+  //   return [
+  //     ...replies,
+  //     {
+  //       label: "📂 Browse all options",
+  //       onClick: () => {
+  //         setQuickReplies(buildCategoriesReplies());
+  //         push({ sender: "guest", text: "Browse categories" });
+  //         botSend("Choose a category below 👇");
+  //       },
+  //     },
+  //   ] as QuickReply[];
+  // };
 
   /** --------------------------------------------------------------
    * Actions
@@ -155,9 +160,14 @@ export default function GuestChatBot() {
     );
   };
 
-  const handleItem = (item: GuestServiceItem) => {
+  const handleItem = async (item: GuestServiceItem) => {
     push({ sender: "guest", text: item.label });
-    if ("reply" in item && typeof item.reply === "string") {
+    console.log("Handling item:", item);
+    const maybeReply = await item.action();
+
+    if (typeof maybeReply === "string") {
+      botSend(maybeReply);
+    } else if (item.reply) {
       botSend(item.reply);
     } else {
       botSend("Thank you for your request! We'll process it shortly.");
@@ -183,7 +193,9 @@ export default function GuestChatBot() {
   useEffect(() => {
     if (messages.length === 0) {
       botSend(
-        "Hi! I’m your DreamsMoon concierge. Quick actions below, or browse categories 👇",
+        `Hi ${Capitalize(
+          (booking?.guestName.toLowerCase() as string) || "Guest"
+        )}! I’m your Zenvana concierge. Quick actions below, or browse categories 👇`,
         0
       );
       setQuickReplies(buildHomeReplies());

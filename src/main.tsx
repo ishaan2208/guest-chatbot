@@ -27,13 +27,16 @@ const provider = createBrowserRouter([
         path: "/login",
         element: <Login />,
       },
-      {
-        path: "/chatbot",
-        element: <GuestChatBot />,
-      },
+
       {
         path: "/room",
         element: <RoomPage />,
+        children: [
+          {
+            path: "chatbot",
+            element: <GuestChatBot />,
+          },
+        ],
       },
     ],
   },

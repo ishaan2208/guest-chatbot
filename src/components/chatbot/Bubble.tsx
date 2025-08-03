@@ -17,7 +17,7 @@ const Bubble: FC<BubbleProps> = ({ sender, text }) => {
     >
       {sender === "bot" && <ChatAvatar sender="bot" />}
       <span
-        className={`max-w-[75%] rounded-2xl p-3 text-sm leading-relaxed shadow-md whitespace-pre-line
+        className={`max-w-[75%] rounded-2xl p-3 text-sm leading-relaxed shadow-md whitespace-pre-line 
       ${
         sender === "guest"
           ? "bg-violet-600 text-white"

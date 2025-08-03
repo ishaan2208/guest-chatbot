@@ -56,6 +56,7 @@ export type Property = {
   channelManagerId: string;
   room_types: RoomType[];
   invoice: Invoice[];
+  wifiPassword: string;
 };
 
 export type Invoice = {
