@@ -1,8 +1,6 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import App from "./App.tsx";
 import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
-import Loading from "./components/Loading.tsx";
 import Login from "./pages/Login.page.tsx";
 import GuestChatBot from "./components/chatbot/GuestChatBot.tsx";
 import { ThemeProvider } from "./components/theme-provider.tsx";
