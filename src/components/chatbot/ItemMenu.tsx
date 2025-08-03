@@ -1,7 +1,7 @@
 import type { FC } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { guestServiceMenu } from "@/constants/guetsService";
+import { useGuestServiceMenu } from "@/constants/guetsService";
 import type { GuestServiceItem } from "@/constants/guetsService";
 
 interface ItemMenuProps {
@@ -15,6 +15,7 @@ const ItemMenu: FC<ItemMenuProps> = ({
   onBack,
   onItemClick,
 }) => {
+  const guestServiceMenu = useGuestServiceMenu();
   const { category, items } = guestServiceMenu[categoryIndex];
 
   return (
