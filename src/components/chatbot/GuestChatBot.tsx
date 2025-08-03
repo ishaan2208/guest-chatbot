@@ -226,13 +226,13 @@ export default function GuestChatBot() {
         <Card className="mx-auto w-full max-w-md border-none bg-transparent rounded-none  ">
           <CardContent
             className=" flex h-full flex-col 
-    bg-black/70 backdrop-blur-sm  rounded-none min-h-[85vh] w-full px-2"
+    bg-black/70 backdrop-blur-sm  rounded-none  w-full px-2"
           >
             {/* bottom glow */}
-            <div
+            {/* <div
               className="pointer-events-none absolute inset-x-0 bottom-0 h-40 
       rounded-none bg-gradient-to-t from-violet-700/30 via-transparent to-transparent"
-            />
+            /> */}
 
             {/* 🗨 Chat area */}
             <ChatWindow
