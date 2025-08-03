@@ -28,7 +28,9 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: true,
           isChargeable: false,
-          reply: `📶 Hey ${firstName}, Wi-Fi pass: ${wifiPass}`,
+          reply: `📶 Hey ${Capitalize(
+            booking?.guestName?.split(" ")?.[0] || "Guest"
+          )}, Wi-Fi pass: ${wifiPass}`,
           action: () => null, // reply handles content
         },
         {

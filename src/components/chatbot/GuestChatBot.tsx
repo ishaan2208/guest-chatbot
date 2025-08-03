@@ -220,13 +220,13 @@ export default function GuestChatBot() {
    * Render
    * --------------------------------------------------------------*/
   return (
-    <div className="h-[100dvh] pb-[env(safe-area-inset-bottom)]">
+    <div className="h-[100dvh] pb-[env(safe-area-inset-bottom)] dark:bg-black/70 bg-gray-200">
       <Header />
-      <div className="pt-20">
-        <Card className="mx-auto w-full max-w-md border-none bg-transparent rounded-none  ">
+      <div className="pt-24">
+        <Card className="mx-auto w-full max-w-md border-none bg-transparent rounded-none shadow-none">
           <CardContent
             className=" flex h-full flex-col 
-    bg-black/70 backdrop-blur-sm  rounded-none  w-full px-2"
+    dark:bg-black/70 bg-gray-200  backdrop-blur-sm  rounded-none  w-full px-2"
           >
             {/* bottom glow */}
             {/* <div

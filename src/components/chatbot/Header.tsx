@@ -3,6 +3,7 @@ import { BadgeCheck, LogOut } from "lucide-react";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
 import ChatAvatar from "./Avatar";
+import { ModeToggle } from "../mode-toggle";
 
 const Header: FC = () => {
   // Function to clear localStorage and redirect to login page
@@ -17,13 +18,13 @@ const Header: FC = () => {
   };
 
   return (
-    <header className="fixed flex top-0 left-0 items-center gap-2 z-20 bg-black w-full justify-between p-5  border-b-[1px] dark:border-gray-950 shadow-2xl shadow-bl max-h-[15vh]">
+    <header className="fixed flex top-0 left-0 items-center gap-2 z-20 bg-gray-200 w-full justify-between p-5 dark:bg-black border-b-[1px] border-gray-300 dark:border-gray-900 shadow-2xl shadow-bl max-h-[15vh]">
       <div
         onClick={() => {
           //reload the page
           window.location.reload();
         }}
-        className=" flex items-center space-x-6"
+        className=" flex items-center space-x-3"
       >
         <ChatAvatar sender="bot" />
         <div className="flex flex-col space-y-1">
@@ -42,7 +43,8 @@ const Header: FC = () => {
         </div>
       </div>
 
-      <div>
+      <div className=" flex space-x-2">
+        <ModeToggle />
         <Button
           onClick={emptyLocalStorage}
           variant={"outline"}

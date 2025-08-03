@@ -30,7 +30,7 @@ const TypingIndicator: FC<TypingIndicatorProps> = ({
       ? // guest: brand gradient bubble
         "bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600 text-white"
       : // bot: soft dark bubble
-        "bg-zinc-800/90 text-zinc-100";
+        "dark:bg-zinc-800/90 dark:text-zinc-100";
 
   return (
     <div className={`flex ${align} py-2`}>
@@ -39,7 +39,7 @@ const TypingIndicator: FC<TypingIndicatorProps> = ({
         aria-live="polite"
         aria-label="Typing"
         className={[
-          "inline-flex items-center gap-1 rounded-2xl shadow",
+          "inline-flex items-center gap-1 rounded-2xl dark:shadow",
           bubble ? `${bubbleClass} ${pad}` : "",
         ].join(" ")}
       >
