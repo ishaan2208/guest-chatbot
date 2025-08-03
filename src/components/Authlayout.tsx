@@ -31,7 +31,7 @@ export default function AuthLayout({
       console.log("No booking found, redirecting to login page.");
       navigate("/login");
     }
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="">

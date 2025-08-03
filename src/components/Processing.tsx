@@ -1,6 +1,5 @@
 "use client";
 
-import { DivideIcon } from "lucide-react";
 import { AiOutlineLoading } from "react-icons/ai";
 
 export default function Processing() {

@@ -59,7 +59,7 @@ export default function Login() {
       localStorage.removeItem("phoneNumber");
       localStorage.removeItem("roomNumberId");
     }
-  }, []);
+  }, [bookingId, navigate, phoneNumber]);
 
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {

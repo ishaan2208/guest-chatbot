@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ChatWindow from "./ChatWindow";
 import Header from "./Header";
-// 🔑  Ensure the file name matches exactly → guestService.ts (NO typo!)
 import { useGuestServiceMenu } from "@/constants/guetsService";
 import type { GuestServiceItem } from "@/constants/guetsService";
 import type { QuickReply } from "./QuickReplies";
@@ -31,6 +30,8 @@ export default function GuestChatBot() {
   const [categoryIndex, setCategoryIndex] = useState<number | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const booking = useRecoilValue(bookingAtom);
+
+  console.log(categoryIndex, "categoryIndex");
 
   const botSend = (text: string, delay = 2000) => {
     setIsTyping(true);
