@@ -30,6 +30,7 @@ export type User = {
 };
 
 export type Property = {
+  receptionNo: string;
   address: string;
   billPointer: number;
   billPrefix: string;

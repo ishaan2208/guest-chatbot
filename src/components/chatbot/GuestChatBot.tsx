@@ -34,7 +34,7 @@ export default function GuestChatBot() {
 
   console.log(categoryIndex, "categoryIndex");
 
-  const botSend = (text: string, delay = 2000) => {
+  const botSend = (text: string, delay = 500) => {
     setIsTyping(true);
     setTimeout(() => {
       push({ sender: "bot", text });
@@ -57,7 +57,7 @@ export default function GuestChatBot() {
 
     const extras: QuickReply[] = [
       {
-        label: "Browse all options",
+        label: "Explore Services",
         icon: UI_ICON.browse,
 
         onClick: () => {
@@ -97,7 +97,7 @@ export default function GuestChatBot() {
         icon: UI_ICON.help,
         onClick: () =>
           botSend(
-            "No worries! Please call reception at 100 or press the Help button on your TV."
+            `No worries! Please call reception at ${booking?.property.receptionNo} `
           ),
       },
     ];
