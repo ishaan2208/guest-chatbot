@@ -6,11 +6,11 @@ export function useGuestServiceMenu() {
   const booking = useRecoilValue(bookingAtom);
 
   // lightweight personalization
-  // const firstName = Capitalize(
-  //   booking?.guestName?.split(" ")?.[0] ||
-  //     booking?.guest?.name?.split(" ")?.[0] ||
-  //     "Guest"
-  // );
+  const firstName = Capitalize(
+    booking?.guestName?.split(" ")?.[0].toLowerCase() ||
+      booking?.guest?.name?.split(" ")?.[0].toLowerCase() ||
+      "Guest"
+  );
   const roomNo =
     (typeof window !== "undefined" && localStorage.getItem("roomNumber")) ||
     booking?.BookingRoom?.[0]?.roomNumber ||
@@ -28,9 +28,7 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: true,
           isChargeable: false,
-          reply: `📶 Hey ${Capitalize(
-            booking?.guestName?.split(" ")?.[0] || "Guest"
-          )}, Wi-Fi pass: ${wifiPass}`,
+          reply: `📶 Hey ${firstName}, Wi-Fi pass: ${wifiPass}`,
           action: () => null, // reply handles content
         },
         {

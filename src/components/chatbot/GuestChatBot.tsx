@@ -142,24 +142,24 @@ export default function GuestChatBot() {
   const getFeaturedItems = (): GuestServiceItem[] =>
     guestServiceMenu.flatMap((cat) => cat.items.filter((i) => i.featured));
 
-  // const buildFeaturedReplies = (): QuickReply[] => {
-  //   console.log("Building featured replies");
-  //   const replies = getFeaturedItems().map((item) => ({
-  //     label: item.isChargeable ? `${item.label} 💰` : item.label,
-  //     onClick: () => handleItem(item),
-  //   }));
-  //   return [
-  //     ...replies,
-  //     {
-  //       label: "📂 Browse all options",
-  //       onClick: () => {
-  //         setQuickReplies(buildCategoriesReplies());
-  //         push({ sender: "guest", text: "Browse categories" });
-  //         botSend("Choose a category below 👇");
-  //       },
-  //     },
-  //   ] as QuickReply[];
-  // };
+  const buildFeaturedReplies = (): QuickReply[] => {
+    console.log("Building featured replies");
+    const replies = getFeaturedItems().map((item) => ({
+      label: item.isChargeable ? `${item.label} 💰` : item.label,
+      onClick: () => handleItem(item),
+    }));
+    return [
+      ...replies,
+      {
+        label: "📂 Browse all options",
+        onClick: () => {
+          setQuickReplies(buildCategoriesReplies());
+          push({ sender: "guest", text: "Browse categories" });
+          botSend("Choose a category below 👇");
+        },
+      },
+    ] as QuickReply[];
+  };
 
   /** --------------------------------------------------------------
    * Actions
@@ -188,10 +188,11 @@ export default function GuestChatBot() {
 
     // Optionally clear replies for free‑text follow‑up
     if (item.kind === "CHARGEABLE") {
-      item.action();
-      setQuickReplies([]);
+      console.log("Handling chargeable item:", item);
+      await item.action();
+      setQuickReplies(buildFeaturedReplies());
     } else {
-      item.action();
+      await item.action();
       // After confirmation, offer to choose another category
       setCategoryIndex(null);
       setQuickReplies(buildHomeReplies());
