@@ -5,7 +5,7 @@ const TypingIndicator: FC = () => (
     {Array.from({ length: 3 }).map((_, i) => (
       <span
         key={i}
-        className="h-2 w-2 animate-pulse rounded-full bg-gray-400"
+        className="h-3 w-3 animate-pulse rounded-full bg-gray-400"
         style={{ animationDelay: `${i * 0.2}s` }}
       />
     ))}

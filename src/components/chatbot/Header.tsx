@@ -17,8 +17,14 @@ const Header: FC = () => {
 
   return (
     <header className="flex items-center gap-2 border-b pb-2 mb-10  z-20 bg-black w-full justify-between">
-      <div className=" flex items-center gap-2">
-        <BadgeCheck className="h-4 w-4 text-green-500" />
+      <div
+        onClick={() => {
+          //reload the page
+          window.location.reload();
+        }}
+        className=" flex items-center gap-2"
+      >
+        <BadgeCheck className="h-6 w-6 text-green-500" />
         <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">
           Zenvana Concierge
         </h2>

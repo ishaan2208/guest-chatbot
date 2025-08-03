@@ -1,34 +1,38 @@
-import type { FC } from "react";
+import { cn } from "@/lib/utils";
 import ChatAvatar from "./Avatar";
-import TypingIndicator from "./TypingIndicator";
 
-interface BubbleProps {
+export default function Bubble({
+  sender,
+  text,
+}: {
   sender: "bot" | "guest" | "typing";
-  text?: string;
-}
-
-const Bubble: FC<BubbleProps> = ({ sender, text }) => {
-  if (sender === "typing") return <TypingIndicator />;
+  text: string;
+}) {
+  const isGuest = sender === "guest";
   return (
     <div
-      className={`flex w-full gap-2 ${
-        sender === "guest" ? "justify-end" : "justify-start"
-      }`}
+      className={cn(
+        "flex w-full gap-2 items-center",
+        isGuest ? "justify-end" : "justify-start"
+      )}
     >
       {sender === "bot" && <ChatAvatar sender="bot" />}
+      {sender === "typing" && <ChatAvatar sender="bot" />}
+      {/* {sender === "bot" && <ChatAvatar sender="typing" />} */}
       <span
-        className={`max-w-[75%] rounded-2xl p-3 text-sm leading-relaxed shadow-md whitespace-pre-line 
-      ${
-        sender === "guest"
-          ? "bg-violet-600 text-white"
-          : "bg-gray-200 text-gray-900"
-      }`}
+        className={cn(
+          "relative max-w-[75%] rounded-2xl p-3 text-sm leading-relaxed shadow-md whitespace-pre-line",
+          isGuest ? "bg-violet-600 text-white" : "bg-muted text-foreground",
+          // tails
+          "after:absolute after:bottom-[-6px] after:w-4 after:h-5  after:content-['']",
+          isGuest
+            ? "after:right-[0px] after:clip-path-[polygon(100%_0,0_0,0_100%)] after:rounded-bl-[10px]  after:bg-violet-600 "
+            : "after:left-[0px] after:bg-muted after:clip-path-[polygon(100%_0,100%_0,100%_100%)] after:rounded-br-[10px]"
+        )}
       >
         {text}
       </span>
       {sender === "guest" && <ChatAvatar sender="guest" />}
     </div>
   );
-};
-
-export default Bubble;
+}

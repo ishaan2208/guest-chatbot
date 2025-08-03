@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { Button } from "@/components/ui/button";
-import { useGuestServiceMenu } from "@/constants/guetsService";
+import { useGuestServiceMenu } from "@/constants/guestService";
 
 interface CategoryMenuProps {
   onSelect: (categoryIndex: number) => void;
@@ -16,7 +16,7 @@ const CategoryMenu: FC<CategoryMenuProps> = ({ onSelect }) => {
           key={category}
           variant="secondary"
           size="sm"
-          className="w-full justify-start text-white"
+          className="w-fit justify-start text-white"
           onClick={() => onSelect(idx)}
         >
           {category}

@@ -31,7 +31,7 @@ const ChatWindow: FC<ChatWindowProps> = ({
       {messages.map((msg, idx) => (
         <Bubble key={idx} sender={msg.sender} text={msg.text} />
       ))}
-      {isTyping && <Bubble sender="typing" />}
+      {isTyping && <Bubble sender="typing" text="..." />}
       {quickReplies.length > 0 && !isTyping && (
         <QuickReplies replies={quickReplies} />
       )}

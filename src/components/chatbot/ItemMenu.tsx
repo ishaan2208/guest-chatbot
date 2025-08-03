@@ -1,8 +1,8 @@
 import type { FC } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { useGuestServiceMenu } from "@/constants/guetsService";
-import type { GuestServiceItem } from "@/constants/guetsService";
+import { useGuestServiceMenu } from "@/constants/guestService";
+import type { GuestServiceItem } from "@/constants/guestService";
 
 interface ItemMenuProps {
   categoryIndex: number;
@@ -34,7 +34,7 @@ const ItemMenu: FC<ItemMenuProps> = ({
             variant="outline"
             size="sm"
             onClick={() => onItemClick(item)}
-            className="flex-shrink-0 text-white"
+            className="flex-shrink-0 text-white "
           >
             {item.label}
           </Button>

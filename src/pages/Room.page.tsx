@@ -5,6 +5,7 @@ import { useRecoilState } from "recoil";
 import Loading from "@/components/Loading";
 import { Outlet, useNavigate } from "react-router-dom";
 import type { BookingRoom } from "@/types/booking.types";
+import { Button } from "@/components/ui/button";
 
 export default function RoomPage() {
   // Get bookingId , phoneNumber, and roomNumber from localStorage
@@ -86,21 +87,21 @@ export default function RoomPage() {
   ) : (
     <>
       <div className=" p-4">
-        <h1 className="text-xl font-bold text-center mt-4">
-          Select Room Number
-        </h1>
-        {booking?.BookingRoom.map((room) => (
-          <div
-            onClick={() => handleRoomClick({ roomNumberId: String(room.id) })}
-            key={room.id}
-            className="px-2 py-1 rounded-sm shadow-md mb-4 border-1 w-fit cursor-pointer hover:bg-gray-100 transition-colors"
-          >
-            <p className="text-sm font-semibold">{room.roomNumber}</p>
-            {/* <p className="text-gray-600">
+        <h1 className="text-xl font-bold text-center mt-4">Select Room</h1>
+        <div className=" flex space-x-2 flex-wrap justify-center mt-4">
+          {booking?.BookingRoom.map((room) => (
+            <Button
+              onClick={() => handleRoomClick({ roomNumberId: String(room.id) })}
+              key={room.id}
+              className="px-2 py-1 rounded-sm shadow-md mb-4 border-1 w-fit cursor-pointer hover:bg-gray-100 transition-colors"
+            >
+              <p className="text-sm font-semibold">{room.roomNumber}</p>
+              {/* <p className="text-gray-600">
             <strong>Price:</strong> ${room.price}
           </p> */}
-          </div>
-        ))}
+            </Button>
+          ))}
+        </div>
       </div>
     </>
   );

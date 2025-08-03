@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import ChatWindow from "./ChatWindow";
 import Header from "./Header";
-import { useGuestServiceMenu } from "@/constants/guetsService";
-import type { GuestServiceItem } from "@/constants/guetsService";
+import { useGuestServiceMenu } from "@/constants/guestService";
+import type { GuestServiceItem } from "@/constants/guestService";
 import type { QuickReply } from "./QuickReplies";
 import { useRecoilValue } from "recoil";
 import { bookingAtom } from "@/store/booking.recoil";
 import { Capitalize } from "@/lib/Capitalize";
+import { BackgroundBeamsWithCollision } from "../Background";
 
 /** ----------------------------------------------------------------
  * 📨 Local message shape
@@ -208,17 +209,27 @@ export default function GuestChatBot() {
    * Render
    * --------------------------------------------------------------*/
   return (
-    <Card className="mx-auto w-full max-w-md bg-transparent border-none">
-      <CardContent className="flex h-full flex-col p-4">
-        <Header />
+    <div className="h-[100dvh] pb-[env(safe-area-inset-bottom)]">
+      <Card className="mx-auto w-full max-w-md border-none bg-transparent rounded-none min-h-screen">
+        <CardContent
+          className="relative flex h-full flex-col p-4  
+    bg-black/70 backdrop-blur-sm ring-1 lg:ring-0 ring-white/10 rounded-none min-h-screen w-full"
+        >
+          {/* bottom glow */}
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-40 
+      rounded-none bg-gradient-to-t from-violet-700/30 via-transparent to-transparent"
+          />
+          <Header />
 
-        {/* 🗨 Chat area */}
-        <ChatWindow
-          messages={messages}
-          quickReplies={quickReplies}
-          isTyping={isTyping}
-        />
-      </CardContent>
-    </Card>
+          {/* 🗨 Chat area */}
+          <ChatWindow
+            messages={messages}
+            quickReplies={quickReplies}
+            isTyping={isTyping}
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 }
