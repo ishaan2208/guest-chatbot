@@ -10,10 +10,9 @@ export default function AuthLayout({
   const navigate = useNavigate();
   //use react-router-dom to search parameters
 
-  const searchParams = new URLSearchParams(window.location.search);
-
   // Check localStorage for bookingId ,phoneNumber on component mount
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
     //check localStorage for bookingId and phoneNumber
     const bookingId = localStorage.getItem("bookingId");
     const phoneNumber = localStorage.getItem("phoneNumber");

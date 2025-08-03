@@ -5,7 +5,7 @@ export function useGuestServiceMenu() {
   const booking = useRecoilValue(bookingAtom);
   return [
     {
-      category: "🧹 Housekeeping & Essentials",
+      category: "Housekeeping & Essentials",
       description: "Towels, water, toiletries, kits, cleaning",
       items: [
         {
@@ -113,7 +113,7 @@ export function useGuestServiceMenu() {
       ],
     },
     {
-      category: "🛠️ Maintenance",
+      category: "Maintenance",
       description: "Report room or appliance issues",
       items: [
         {
@@ -183,7 +183,7 @@ export function useGuestServiceMenu() {
       ],
     },
     {
-      category: "🍽️ Food & Room Service",
+      category: "Food & Room Service",
       description: "Order food, clearance or custom requests",
       items: [
         {
@@ -229,7 +229,7 @@ export function useGuestServiceMenu() {
       ],
     },
     {
-      category: "📞 Reception & Communication",
+      category: "Reception & Communication",
       description: "Reception, checkout, wake-up call etc.",
       items: [
         {

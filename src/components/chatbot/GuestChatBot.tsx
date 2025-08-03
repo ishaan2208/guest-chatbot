@@ -8,7 +8,7 @@ import type { QuickReply } from "./QuickReplies";
 import { useRecoilValue } from "recoil";
 import { bookingAtom } from "@/store/booking.recoil";
 import { Capitalize } from "@/lib/Capitalize";
-import { BackgroundBeamsWithCollision } from "../Background";
+import { ITEM_ICON, CATEGORY_ICON, UI_ICON } from "@/constants/icons";
 
 /** ----------------------------------------------------------------
  * 📨 Local message shape
@@ -52,11 +52,14 @@ export default function GuestChatBot() {
     const featured = getFeaturedItems().map((item) => ({
       label: item.isChargeable ? `${item.label} 💰` : item.label,
       onClick: () => handleItem(item),
+      icon: ITEM_ICON[item.type],
     }));
 
     const extras: QuickReply[] = [
       {
-        label: "📂 Browse all options",
+        label: "Browse all options",
+        icon: UI_ICON.browse,
+
         onClick: () => {
           // move to categories view
           setCategoryIndex(null);
@@ -74,12 +77,14 @@ export default function GuestChatBot() {
   const buildCategoriesReplies = (): QuickReply[] => {
     const categories = guestServiceMenu.map((cat, idx) => ({
       label: cat.category,
+      icon: CATEGORY_ICON[cat.category], // icon
       onClick: () => handleCategory(idx),
     }));
 
     const extras: QuickReply[] = [
       {
         label: "🏠 Home",
+        icon: UI_ICON.home,
         onClick: () => {
           setCategoryIndex(null);
           setQuickReplies(buildHomeReplies());
@@ -89,6 +94,7 @@ export default function GuestChatBot() {
       },
       {
         label: "🆘 Didn’t find what I need",
+        icon: UI_ICON.help,
         onClick: () =>
           botSend(
             "No worries! Please call reception at 100 or press the Help button on your TV."
@@ -101,14 +107,18 @@ export default function GuestChatBot() {
 
   // ITEMS: items inside a category (+ go back)
   const buildItemReplies = (idx: number): QuickReply[] => {
-    const replies = guestServiceMenu[idx].items.map((item) => ({
-      label: item.isChargeable ? `${item.label} 💰` : item.label,
-      onClick: () => handleItem(item),
-    }));
+    const replies = guestServiceMenu[idx].items
+      .filter((item) => !item.featured)
+      .map((item) => ({
+        label: item.isChargeable ? `${item.label} 💰` : item.label,
+        icon: ITEM_ICON[item.type],
+        onClick: () => handleItem(item),
+      }));
 
     const extras: QuickReply[] = [
       {
-        label: "🔙 Go Back",
+        label: "Go Back",
+        icon: UI_ICON.back,
         onClick: () => {
           setCategoryIndex(null);
           setQuickReplies(buildCategoriesReplies());
@@ -117,7 +127,8 @@ export default function GuestChatBot() {
         },
       },
       {
-        label: "🆘 Didn’t find what I need",
+        label: "Didn’t find what I need",
+        icon: UI_ICON.help,
         onClick: () =>
           botSend(
             "Please call reception at 100 or press the Help button on your TV."
