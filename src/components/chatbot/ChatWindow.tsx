@@ -32,7 +32,9 @@ const ChatWindow: FC<ChatWindowProps> = ({
         <Bubble key={idx} sender={msg.sender} text={msg.text} />
       ))}
       {isTyping && <Bubble sender="typing" />}
-      {quickReplies.length > 0 && <QuickReplies replies={quickReplies} />}
+      {quickReplies.length > 0 && !isTyping && (
+        <QuickReplies replies={quickReplies} />
+      )}
 
       {/* Scroll anchor to ensure we always scroll to the bottom */}
       <div ref={endRef} />

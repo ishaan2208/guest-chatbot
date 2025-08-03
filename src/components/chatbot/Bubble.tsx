@@ -20,7 +20,7 @@ const Bubble: FC<BubbleProps> = ({ sender, text }) => {
         className={`max-w-[75%] rounded-2xl p-3 text-sm leading-relaxed shadow-md whitespace-pre-line
       ${
         sender === "guest"
-          ? "bg-blue-600 text-white"
+          ? "bg-violet-600 text-white"
           : "bg-gray-200 text-gray-900"
       }`}
       >

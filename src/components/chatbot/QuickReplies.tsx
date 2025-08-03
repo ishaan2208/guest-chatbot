@@ -1,10 +1,10 @@
 import type { FC } from "react";
 import { Button } from "@/components/ui/button";
 
-export interface QuickReply {
-  label: string | "Go back";
+export type QuickReply = {
+  label: string; // make flexible
   onClick: () => void;
-}
+};
 
 interface QuickRepliesProps {
   replies: QuickReply[];

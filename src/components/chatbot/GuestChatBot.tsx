@@ -40,32 +40,107 @@ export default function GuestChatBot() {
    * --------------------------------------------------------------*/
   const push = (msg: Message) => setMessages((prev) => [...prev, msg]);
 
-  const buildCategoryReplies = (): QuickReply[] => {
-    return guestServiceMenu.map((cat, idx) => ({
+  // HOME: featured + "Browse all options"
+  const buildHomeReplies = (): QuickReply[] => {
+    const featured = getFeaturedItems().map((item) => ({
+      label: item.isChargeable ? `${item.label} 💰` : item.label,
+      onClick: () => handleItem(item),
+    }));
+
+    const extras: QuickReply[] = [
+      {
+        label: "📂 Browse all options",
+        onClick: () => {
+          // move to categories view
+          setCategoryIndex(null);
+          setQuickReplies(buildCategoriesReplies());
+          push({ sender: "guest", text: "Browse categories" });
+          botSend("Choose a category below 👇");
+        },
+      },
+    ];
+
+    return [...featured, ...extras] as QuickReply[];
+  };
+
+  // CATEGORIES: list all categories (not featured)
+  const buildCategoriesReplies = (): QuickReply[] => {
+    const categories = guestServiceMenu.map((cat, idx) => ({
       label: cat.category,
       onClick: () => handleCategory(idx),
     }));
-  };
 
-  const buildItemReplies = (idx: number): QuickReply[] => {
-    const replies = guestServiceMenu[idx].items.map((item) => ({
-      label: item.label,
-      onClick: () => handleItem(item),
-    }));
-    // Add "Go back" option if not already at the top level
-    if (categoryIndex !== null) {
-      replies.push({
-        //@ts-ignore
-        label: "Go back",
+    const extras: QuickReply[] = [
+      {
+        label: "🏠 Home",
         onClick: () => {
           setCategoryIndex(null);
-          setQuickReplies(buildCategoryReplies());
-          push({ sender: "guest", text: "Go back to categories" });
-          botSend("Sure! Please choose a category below 👇");
+          setQuickReplies(buildHomeReplies());
+          push({ sender: "guest", text: "Back to home" });
+          botSend("Quick actions below, or pick a category.");
         },
-      });
-    }
-    return replies;
+      },
+      {
+        label: "🆘 Didn’t find what I need",
+        onClick: () =>
+          botSend(
+            "No worries! Please call reception at 100 or press the Help button on your TV."
+          ),
+      },
+    ];
+
+    return [...categories, ...extras] as QuickReply[];
+  };
+
+  // ITEMS: items inside a category (+ go back)
+  const buildItemReplies = (idx: number): QuickReply[] => {
+    const replies = guestServiceMenu[idx].items.map((item) => ({
+      label: item.isChargeable ? `${item.label} 💰` : item.label,
+      onClick: () => handleItem(item),
+    }));
+
+    const extras: QuickReply[] = [
+      {
+        label: "🔙 Go Back",
+        onClick: () => {
+          setCategoryIndex(null);
+          setQuickReplies(buildCategoriesReplies());
+          push({ sender: "guest", text: "Go back" });
+          botSend("No problem. Please choose a category below 👇");
+        },
+      },
+      {
+        label: "🆘 Didn’t find what I need",
+        onClick: () =>
+          botSend(
+            "Please call reception at 100 or press the Help button on your TV."
+          ),
+      },
+    ];
+
+    return [...replies, ...extras] as QuickReply[];
+  };
+
+  const getFeaturedItems = (): GuestServiceItem[] =>
+    guestServiceMenu.flatMap((cat) => cat.items.filter((i) => i.featured));
+
+  const buildFeaturedReplies = (): QuickReply[] => {
+    console.log("Building featured replies");
+    const replies = getFeaturedItems().map((item) => ({
+      label: item.isChargeable ? `${item.label} 💰` : item.label,
+      onClick: () => handleItem(item),
+    }));
+    return [
+      ...replies,
+      {
+        label: "📂 Browse all options",
+        onClick: () => {
+          setQuickReplies(buildCategoriesReplies());
+          push({ sender: "guest", text: "Browse categories" });
+          botSend("Choose a category below 👇");
+        },
+      },
+    ] as QuickReply[];
   };
 
   /** --------------------------------------------------------------
@@ -74,7 +149,6 @@ export default function GuestChatBot() {
   const handleCategory = (idx: number) => {
     setCategoryIndex(idx);
     setQuickReplies(buildItemReplies(idx));
-
     push({ sender: "guest", text: guestServiceMenu[idx].category });
     botSend(
       `Great! Please pick a service in "${guestServiceMenu[idx].category}"`
@@ -83,15 +157,21 @@ export default function GuestChatBot() {
 
   const handleItem = (item: GuestServiceItem) => {
     push({ sender: "guest", text: item.label });
-    botSend(item.reply);
+    if ("reply" in item && typeof item.reply === "string") {
+      botSend(item.reply);
+    } else {
+      botSend("Thank you for your request! We'll process it shortly.");
+    }
 
     // Optionally clear replies for free‑text follow‑up
-    if (item.kind === "COMPLAINT") {
+    if (item.kind === "CHARGEABLE") {
+      item.action();
       setQuickReplies([]);
     } else {
+      item.action();
       // After confirmation, offer to choose another category
       setCategoryIndex(null);
-      setQuickReplies(buildCategoryReplies());
+      setQuickReplies(buildHomeReplies());
     }
 
     // TODO: fetch("/api/guest-service", …) here
@@ -101,15 +181,15 @@ export default function GuestChatBot() {
    * Init – greet + categories on mount
    * --------------------------------------------------------------*/
   useEffect(() => {
-    // Greet only once
     if (messages.length === 0) {
       botSend(
-        "Hi! I’m your DreamsMoon concierge. Tap a category below to get started 👇",
+        "Hi! I’m your DreamsMoon concierge. Quick actions below, or browse categories 👇",
         0
       );
-      setQuickReplies(buildCategoryReplies());
+      setQuickReplies(buildHomeReplies());
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /** --------------------------------------------------------------
    * Render

@@ -1,0 +1,191 @@
+import type { Room } from "./booking.types";
+import type { Booking } from "./booking.types";
+
+export type User = {
+  createdAt: string;
+  deleted: boolean;
+  deletedAt: string | null;
+  disabled: boolean;
+  firstName: string;
+  id: number;
+  lastName: string;
+  passcode: string;
+  passcodeEnabled: boolean;
+  passcodeExpiry: string | null;
+  passcodeTries: number;
+  password: string;
+  property: Property;
+  propertyId: number;
+  restaurant: Restaurant;
+  restaurantId: number;
+  role: string;
+  sessionVersion: number;
+  updatedAt: string;
+  userId: number;
+  username: string;
+  user: MainUser;
+  displayImageUrl: string;
+  newProp: boolean;
+  newRest: boolean;
+};
+
+export type Property = {
+  address: string;
+  billPointer: number;
+  billPrefix: string;
+  city: string;
+  country: string;
+  createdAt: string;
+  deleted: boolean;
+  deletedAt: string | null;
+  disabled: boolean;
+  email: string;
+  firmName: string;
+  gstNumber: string;
+  id: number;
+  name: string;
+  phone: string;
+  pincode: string;
+  state: string;
+  updatedAt: string;
+  userId: number;
+  rooms: Room[];
+  allowPreviousBooking: boolean;
+  logoUrl: string;
+  channelManagerEnabled: boolean;
+  channelManagerId: string;
+  room_types: RoomType[];
+  invoice: Invoice[];
+};
+
+export type Invoice = {
+  id: number;
+  invoiceNumber: string;
+  invoiceTypeId: number;
+  invoiceType: InvoiceType;
+  billFrom: Date;
+  billTill: Date;
+  amount: number;
+  paymentStatus: boolean;
+  paymentDate?: string;
+  paymentMode: string;
+  paymentReferenceId: string;
+  remarks?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deleted: boolean;
+  deletedAt?: Date;
+  propertyId?: number;
+  property?: Property;
+  restaurantId?: number;
+  restaurant?: Restaurant;
+  userId: number;
+  user: User;
+};
+export type InvoiceType = {
+  id: number;
+  name: string;
+  price: number;
+  pointer: number;
+  prefix: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deleted: boolean;
+  deletedAt?: Date;
+  invoice: Invoice[];
+};
+
+export type RoomType = {
+  id: number;
+  name: string;
+  channelManagerId: string;
+  createdAt: string;
+  updatedAt: string;
+  deleted: boolean;
+  deletedAt: null | string;
+  propertyId: number;
+  defaultTariff: number;
+  rooms: Room[];
+};
+
+export type Restaurant = {
+  address: string;
+  billPointer: number;
+  billPrefix: string;
+  city: string;
+  country: string;
+  createdAt: string;
+  deleted: boolean;
+  deletedAt: string | null;
+  disabled: boolean;
+  email: string;
+  firmName: string;
+  gstNumber: string;
+  id: number;
+  kotPointer: number;
+  kotPrefix: string;
+  lastClosedAt: string | null;
+  name: string;
+  phone: string;
+  pincode: string;
+  state: string;
+  updatedAt: string;
+  userId: number;
+  logoUrl: string;
+};
+
+type MainUser = {
+  address: string;
+  createdAt: string;
+  disabled: boolean;
+  email: string;
+  firmName: string;
+  firstName: string;
+  gstNumber: string;
+  id: number;
+  lastName: string;
+  password: string;
+  phone: string;
+  sessionVersion: number;
+  transactionIdRequired: boolean;
+  updatedAt: string;
+  username: string;
+  idsEnabled: boolean;
+  otherChargesFixed: boolean;
+  otherChargesTypes: OtherChargesTypes[];
+};
+
+export type OtherCharges = {
+  id: number;
+  bookingId: number;
+  subUserId: number;
+  subUser: User;
+  booking: Booking;
+  title: string;
+  amount: number;
+  quantity: number; // price should be amount/quantity
+  remarks?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deleted: boolean;
+  deletedAt?: Date;
+  includedInBill: boolean;
+  otherChargesTypesId?: number;
+  otherChargesTypes?: OtherChargesTypes;
+};
+
+export type OtherChargesTypes = {
+  id: number;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  deleted: boolean;
+  deletedAt: string | null;
+  userId: number;
+  user: User;
+  price: number;
+  remarks: string | null;
+  priceFixed: boolean;
+  maxQuantity: number;
+  otherCharges: OtherCharges[];
+};
