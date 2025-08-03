@@ -226,7 +226,7 @@ export default function GuestChatBot() {
         <Card className="mx-auto w-full max-w-md border-none bg-transparent rounded-none  ">
           <CardContent
             className=" flex h-full flex-col 
-    bg-black/70 backdrop-blur-sm  rounded-none min-h-[88vh] w-full px-2"
+    bg-black/70 backdrop-blur-sm  rounded-none min-h-[85vh] w-full px-2"
           >
             {/* bottom glow */}
             <div
