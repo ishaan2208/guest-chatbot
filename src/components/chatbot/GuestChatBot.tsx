@@ -29,6 +29,7 @@ export default function GuestChatBot() {
   const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
   // 🧭 Navigation state
   const [categoryIndex, setCategoryIndex] = useState<number | null>(null);
+  console.log("GuestChatBot mounted", categoryIndex);
   const [isTyping, setIsTyping] = useState(false);
   const booking = useRecoilValue(bookingAtom);
 
