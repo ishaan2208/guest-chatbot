@@ -116,7 +116,11 @@ export default function Login() {
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="1234567890" {...field} />
+                    <Input
+                      className=" text-white"
+                      placeholder="1234567890"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

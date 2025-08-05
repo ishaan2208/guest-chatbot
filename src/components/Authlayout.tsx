@@ -16,12 +16,12 @@ export default function AuthLayout({
     //check localStorage for bookingId and phoneNumber
     const bookingId = localStorage.getItem("bookingId");
     const phoneNumber = localStorage.getItem("phoneNumber");
-    const roomNumber = localStorage.getItem("roomNumberId");
+    const roomNumberId = localStorage.getItem("roomNumberId");
 
     if (bookingId && phoneNumber) {
       console.log("Booking found, proceeding to room page.");
       // If bookingId and phoneNumber are present, proceed to room page
-      if (roomNumber) {
+      if (roomNumberId) {
         navigate("/room/chatbot");
       } else {
         navigate("/room");

@@ -32,8 +32,6 @@ export default function GuestChatBot() {
   const [isTyping, setIsTyping] = useState(false);
   const booking = useRecoilValue(bookingAtom);
 
-  console.log(categoryIndex, "categoryIndex");
-
   const botSend = (text: string, delay = 500) => {
     setIsTyping(true);
     setTimeout(() => {
@@ -143,7 +141,6 @@ export default function GuestChatBot() {
     guestServiceMenu.flatMap((cat) => cat.items.filter((i) => i.featured));
 
   const buildFeaturedReplies = (): QuickReply[] => {
-    console.log("Building featured replies");
     const replies = getFeaturedItems().map((item) => ({
       label: item.isChargeable ? `${item.label} 💰` : item.label,
       onClick: () => handleItem(item),
@@ -174,8 +171,9 @@ export default function GuestChatBot() {
   };
 
   const handleItem = async (item: GuestServiceItem) => {
+    setIsTyping(true);
     push({ sender: "guest", text: item.label });
-    console.log("Handling item:", item);
+
     const maybeReply = await item.action();
 
     if (typeof maybeReply === "string") {
@@ -188,7 +186,6 @@ export default function GuestChatBot() {
 
     // Optionally clear replies for free‑text follow‑up
     if (item.kind === "CHARGEABLE") {
-      console.log("Handling chargeable item:", item);
       await item.action();
       setQuickReplies(buildFeaturedReplies());
     } else {
@@ -221,13 +218,13 @@ export default function GuestChatBot() {
    * Render
    * --------------------------------------------------------------*/
   return (
-    <div className="h-[100dvh] pb-[env(safe-area-inset-bottom)] dark:bg-black/70 bg-gray-200">
+    <div className="h-[100dvh] pb-[env(safe-area-inset-bottom)] dark:bg-slate-950 bg-gray-200">
       <Header />
       <div className="pt-24">
         <Card className="mx-auto w-full max-w-md border-none bg-transparent rounded-none shadow-none">
           <CardContent
             className=" flex h-full flex-col 
-    dark:bg-black/70 bg-gray-200  backdrop-blur-sm  rounded-none  w-full px-2"
+    dark:bg-slate-950 bg-gray-200  backdrop-blur-sm  rounded-none  w-full px-2"
           >
             {/* bottom glow */}
             {/* <div

@@ -18,7 +18,7 @@ const Header: FC = () => {
   };
 
   return (
-    <header className="fixed flex top-0 left-0 items-center gap-2 z-20 bg-gray-200 w-full justify-between p-5 dark:bg-black border-b-[1px] border-gray-300 dark:border-gray-900 shadow-2xl shadow-bl max-h-[15vh]">
+    <header className="fixed flex top-0 left-0 items-center gap-2 z-20 bg-gray-200 w-full justify-between p-5 dark:bg-black border-b-[1px] border-gray-300 dark:border-slate-900/90 shadow-2xl shadow-bl max-h-[15vh]">
       <div
         onClick={() => {
           //reload the page

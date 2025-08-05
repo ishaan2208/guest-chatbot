@@ -72,7 +72,7 @@ export default function RoomPage() {
         setLoading(false);
         localStorage.removeItem("bookingId");
         localStorage.removeItem("phoneNumber");
-        localStorage.removeItem("roomNumber");
+        localStorage.removeItem("roomNumberId");
         navigate("/login");
       });
   }, [bookingId, phoneNumber, navigate, roomNumberId, setBooking]);

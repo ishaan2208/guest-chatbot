@@ -11,11 +11,17 @@ export function useGuestServiceMenu() {
       booking?.guest?.name?.split(" ")?.[0].toLowerCase() ||
       "Guest"
   );
-  const roomNo =
-    (typeof window !== "undefined" && localStorage.getItem("roomNumber")) ||
+  let roomNo =
+    (typeof window !== "undefined" &&
+      booking?.BookingRoom.find(
+        (room) => String(room.id) === localStorage.getItem("roomNumberId")
+      )?.roomNumber) ||
     booking?.BookingRoom?.[0]?.roomNumber ||
     "your room";
+  roomNo = roomNo === "N/A" ? "your room" : roomNo;
   const wifiPass = booking?.property?.wifiPassword ?? "Not available";
+  const bookingRoomId =
+    localStorage.getItem("roomNumberId") || String(booking?.BookingRoom[0].id);
 
   return [
     {
@@ -29,7 +35,11 @@ export function useGuestServiceMenu() {
           featured: true,
           isChargeable: false,
           reply: `📶 Hey ${firstName}, Wi-Fi pass: ${wifiPass}`,
-          action: () => null, // reply handles content
+          action: () => {
+            console.log();
+            console.log("g", localStorage.getItem("roomNumberId"));
+            return null;
+          }, // reply handles content
         },
         {
           type: "EXTRA_TOWELS",
@@ -38,7 +48,25 @@ export function useGuestServiceMenu() {
           featured: true,
           isChargeable: false,
           reply: `🧺 On it! Towels to ${roomNo}.`,
-          action: () => sendRequest("TOWELS"),
+          action: async () => {
+            setTimeout(() => {
+              console.log("Requesting extra towels for:", roomNo);
+            }, 5000);
+            const action = await actionableAction(
+              bookingRoomId,
+              booking as Booking,
+              "TOWELS"
+            );
+            console.log(
+              "Actionable action for towels:",
+              localStorage.getItem("roomNumberId")
+            );
+            if (action.existed) {
+              return "Request already sent. We’ll send towels to " + roomNo;
+            } else {
+              return;
+            }
+          },
         },
         {
           type: "WATER_REFILL",
@@ -47,7 +75,8 @@ export function useGuestServiceMenu() {
           featured: true,
           isChargeable: false,
           reply: `💧 Water coming to ${roomNo}.`,
-          action: () => sendRequest("WATER"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "WATER"),
         },
         {
           type: "ROOM_CLEANING",
@@ -56,7 +85,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🧹 Noted. Housekeeping will come shortly.",
-          action: () => sendRequest("CLEANING"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "CLEANING"),
         },
         {
           type: "SOAP_REQUEST",
@@ -65,7 +95,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🧼 Sending soap refillnow.",
-          action: () => sendRequest("SOAP"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "SOAP"),
         },
         {
           type: "BODY_WASH",
@@ -74,7 +105,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🚿 Body wash on the way.",
-          action: () => sendRequest("BODY_WASH"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "BODY_WASH"),
         },
         {
           type: "SLIPPER",
@@ -83,7 +115,13 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: true,
           reply: `🩴 Paid item. We’ll send it to ${roomNo}.`,
-          action: () => sendRequest("SLIPPER", true),
+          action: () =>
+            actionableAction(
+              bookingRoomId,
+              booking as Booking,
+              "SLIPPER",
+              true
+            ),
         },
         {
           type: "DENTAL_KIT",
@@ -92,7 +130,13 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: true,
           reply: `🪥 Paid item. Dental kit to ${roomNo}.`,
-          action: () => sendRequest("DENTAL_KIT", true),
+          action: () =>
+            actionableAction(
+              bookingRoomId,
+              booking as Booking,
+              "DENTAL_KIT",
+              true
+            ),
         },
         {
           type: "SHAVING_KIT",
@@ -101,7 +145,13 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: true,
           reply: `🪒 Paid item. Shaving kit to ${roomNo}.`,
-          action: () => sendRequest("SHAVING_KIT", true),
+          action: () =>
+            actionableAction(
+              bookingRoomId,
+              booking as Booking,
+              "SHAVING_KIT",
+              true
+            ),
         },
         {
           type: "SANITARY_PADS",
@@ -110,7 +160,13 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: true,
           reply: `🧻 Paid item. Pads to ${roomNo}.`,
-          action: () => sendRequest("SANITARY_PADS", true),
+          action: () =>
+            actionableAction(
+              bookingRoomId,
+              booking as Booking,
+              "SANITARY_PADS",
+              true
+            ),
         },
         {
           type: "IRON_REQUEST",
@@ -119,7 +175,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🧺 We’ll send an iron + board.",
-          action: () => sendRequest("IRON"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "IRON"),
         },
         {
           type: "EXTRA_BLANKET",
@@ -128,7 +185,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🛏️ Extra bedding coming up.",
-          action: () => sendRequest("BLANKET"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "BLANKET"),
         },
       ],
     },
@@ -143,7 +201,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "📺 Noted. We’ll check the TV.",
-          action: () => reportIssue("TV"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "TV"),
         },
         {
           type: "FLUSH_NOT_WORKING",
@@ -152,7 +211,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🚽 Got it. We’ll fix the flush.",
-          action: () => reportIssue("FLUSH"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "FLUSH"),
         },
         {
           type: "AC_NOT_WORKING",
@@ -161,7 +221,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "❄️ Tech will check the AC.",
-          action: () => reportIssue("AC"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "AC"),
         },
         {
           type: "LIGHT_ISSUE",
@@ -170,7 +231,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "💡 We’ll fix the lights.",
-          action: () => reportIssue("LIGHTS"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "LIGHTS"),
         },
         {
           type: "GEYSER_ISSUE",
@@ -179,7 +241,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "♨️ Checking the geyser.",
-          action: () => reportIssue("GEYSER"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "GEYSER"),
         },
         {
           type: "SOCKET_ISSUE",
@@ -188,7 +251,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🔌 We’ll look at the socket.",
-          action: () => reportIssue("SOCKET"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "SOCKET"),
         },
         {
           type: "FRIDGE_ISSUE",
@@ -197,7 +261,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🧊 We’ll check the fridge.",
-          action: () => reportIssue("FRIDGE"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "FRIDGE"),
         },
         {
           type: "FAN_ISSUE",
@@ -206,7 +271,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🌀 Fixing the fan soon.",
-          action: () => reportIssue("FAN"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "FAN"),
         },
       ],
     },
@@ -230,7 +296,12 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🧹 We’ll clear it now.",
-          action: () => sendRequest("FOOD_CLEARANCE"),
+          action: () =>
+            actionableAction(
+              bookingRoomId,
+              booking as Booking,
+              "FOOD_CLEARANCE"
+            ),
         },
         {
           type: "KIDS_MEAL",
@@ -239,7 +310,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "👶 Kids meal noted.",
-          action: () => sendRequest("KIDS_MEAL"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "KIDS_MEAL"),
         },
         {
           type: "JAIN_MEAL",
@@ -248,7 +320,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🌱 Jain/custom meal noted.",
-          action: () => sendRequest("JAIN_MEAL"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "JAIN_MEAL"),
         },
         {
           type: "TABLE_BOOKING",
@@ -257,7 +330,12 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "📅 We’ll arrange a table and confirm.",
-          action: () => sendRequest("TABLE_BOOKING"),
+          action: () =>
+            actionableAction(
+              bookingRoomId,
+              booking as Booking,
+              "TABLE_BOOKING"
+            ),
         },
       ],
     },
@@ -294,7 +372,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🧳 Got it. We’ll start your checkout.",
-          action: () => sendRequest("CHECKOUT"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "CHECKOUT"),
         },
         {
           type: "LOST_KEYCARD",
@@ -303,7 +382,8 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🪪 No worries—reissuing your key.",
-          action: () => sendRequest("KEYCARD"),
+          action: () =>
+            actionableAction(bookingRoomId, booking as Booking, "KEYCARD"),
         },
         {
           type: "BOOK_TAXI",
@@ -319,14 +399,47 @@ export function useGuestServiceMenu() {
   ] as const;
 }
 
+// Define ServiceKey as a union of all possible type strings
+export type ServiceKey =
+  | "WIFI_PASSWORD"
+  | "EXTRA_TOWELS"
+  | "WATER_REFILL"
+  | "ROOM_CLEANING"
+  | "SOAP_REQUEST"
+  | "BODY_WASH"
+  | "SLIPPER"
+  | "DENTAL_KIT"
+  | "SHAVING_KIT"
+  | "SANITARY_PADS"
+  | "IRON_REQUEST"
+  | "EXTRA_BLANKET"
+  | "TV_NOT_WORKING"
+  | "FLUSH_NOT_WORKING"
+  | "AC_NOT_WORKING"
+  | "LIGHT_ISSUE"
+  | "GEYSER_ISSUE"
+  | "SOCKET_ISSUE"
+  | "FRIDGE_ISSUE"
+  | "FAN_ISSUE"
+  | "ORDER_FOOD"
+  | "FOOD_CLEARANCE"
+  | "KIDS_MEAL"
+  | "JAIN_MEAL"
+  | "TABLE_BOOKING"
+  | "CALL_RECEPTION"
+  | "EMERGENCY_NUMBER"
+  | "CHECKOUT_REQUEST"
+  | "LOST_KEYCARD"
+  | "BOOK_TAXI";
+
 export interface GuestServiceItem {
-  type: string;
+  type: ServiceKey; // Ensures `type` is one of the values in SERVICE_KEYS
   label: string;
   kind: "FUNCTION" | "CHARGEABLE" | "REDIRECT";
   featured: boolean;
   isChargeable: boolean;
   action: () => void | Promise<void> | unknown;
-  reply?: string; // ← add this
+  reply?: string;
 }
 
 export interface GuestServiceCategory {
@@ -335,21 +448,61 @@ export interface GuestServiceCategory {
   items: GuestServiceItem[];
 }
 
-function sendRequest(type: string, isPaid: boolean = false) {
-  console.log(`Request sent: ${type}, Paid: ${isPaid}`);
-  // example API call
-  fetch("/api/service", {
-    method: "POST",
-    body: JSON.stringify({ type, isPaid }),
-    headers: { "Content-Type": "application/json" },
-  });
+import { createTicketFromItem } from "@/lib/api";
+
+import type { Booking } from "@/types/booking.types";
+
+function ctxFromBooking(booking: Booking, bookingRoomId: string) {
+  return {
+    propertyId: booking?.propertyId ?? null,
+    bookingId: booking?.id ?? null,
+    roomId: booking?.BookingRoom?.[0]?.roomId ?? null,
+    guestId: booking?.guestId ?? null,
+    bookingRoomId,
+    roomNumber:
+      booking?.BookingRoom.find((room) => String(room.id) === bookingRoomId)
+        ?.roomNumber ||
+      booking?.BookingRoom?.[0]?.roomNumber ||
+      "N/A",
+  };
 }
 
-function reportIssue(issue: string) {
-  console.log(`Issue reported: ${issue}`);
-  fetch("/api/maintenance", {
-    method: "POST",
-    body: JSON.stringify({ issue }),
-    headers: { "Content-Type": "application/json" },
-  });
+async function actionableAction(
+  bookingRoomId: string,
+  booking: Booking,
+  type: string,
+
+  isPaid = false,
+  details?: string
+) {
+  try {
+    const ctx = ctxFromBooking(booking, bookingRoomId);
+    const result = await createTicketFromItem(
+      { type, isChargeable: isPaid, details },
+      ctx
+    );
+    console.log("Ticket:", result);
+    return result;
+  } catch (e) {
+    console.error(e);
+  }
 }
+
+// function actionableAction(bookingRoomId,booking as Booking,type: string, isPaid: boolean = false) {
+//   console.log(`Request sent: ${type}, Paid: ${isPaid}`);
+//   // example API call
+//   fetch("/api/service", {
+//     method: "POST",
+//     body: JSON.stringify({ type, isPaid }),
+//     headers: { "Content-Type": "application/json" },
+//   });
+// }
+
+// function actionableAction(bookingRoomId,booking as Booking,issue: string) {
+//   console.log(`Issue reported: ${issue}`);
+//   fetch("/api/maintenance", {
+//     method: "POST",
+//     body: JSON.stringify({ issue }),
+//     headers: { "Content-Type": "application/json" },
+//   });
+// }
