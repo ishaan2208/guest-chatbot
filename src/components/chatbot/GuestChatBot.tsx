@@ -9,6 +9,7 @@ import { useRecoilValue } from "recoil";
 import { bookingAtom } from "@/store/booking.recoil";
 import { Capitalize } from "@/lib/Capitalize";
 import { ITEM_ICON, CATEGORY_ICON, UI_ICON } from "@/constants/icons";
+import BackgroundFX from "./BackgroundFX";
 
 /** ----------------------------------------------------------------
  * 📨 Local message shape
@@ -219,14 +220,20 @@ export default function GuestChatBot() {
    * Render
    * --------------------------------------------------------------*/
   return (
-    <div className="h-[100dvh] pb-[env(safe-area-inset-bottom)] dark:bg-slate-950 bg-gray-200">
+    <div className="relative isolate h-[100dvh] pb-[env(safe-area-inset-bottom)] dark:bg-slate-950 bg-gray-100">
+      <BackgroundFX /> {/* ← lives here */}
       <Header />
-      <div className="pt-24">
-        <Card className="mx-auto w-full max-w-md border-none bg-transparent rounded-none shadow-none">
-          <CardContent
-            className=" flex h-full flex-col 
-    dark:bg-slate-950 bg-gray-200  backdrop-blur-sm  rounded-none  w-full px-2"
-          >
+      <div className=" ">
+        <Card
+          className="mx-auto w-full max-w-md 
+  min-h-[calc(100dvh)]
+  border border-white/30 dark:border-white/10
+  bg-white/40 dark:bg-slate-900/30
+  supports-[backdrop-filter]:backdrop-blur-2xl
+  rounded-none shadow-[0_30px_80px_-40px_rgba(0,0,0,0.5)]
+  flex flex-col pt-24"
+        >
+          <CardContent className="flex-1 flex min-h-0 w-full px-2 sm:px-3">
             {/* bottom glow */}
             {/* <div
               className="pointer-events-none absolute inset-x-0 bottom-0 h-40 

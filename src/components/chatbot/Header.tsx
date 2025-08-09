@@ -6,52 +6,54 @@ import ChatAvatar from "./Avatar";
 import { ModeToggle } from "../mode-toggle";
 
 const Header: FC = () => {
-  // Function to clear localStorage and redirect to login page
-
   const navigate = useNavigate();
   const emptyLocalStorage = () => {
     localStorage.removeItem("bookingId");
     localStorage.removeItem("phoneNumber");
     localStorage.removeItem("roomNumberId");
-    // Redirect to login page
     navigate("/login");
   };
 
   return (
-    <header className="fixed flex top-0 left-0 items-center gap-2 z-20 bg-gray-200 w-full justify-between p-5 dark:bg-black border-b-[1px] border-gray-300 dark:border-slate-900/90 shadow-2xl shadow-bl max-h-[15vh]">
-      <div
-        onClick={() => {
-          //reload the page
-          window.location.reload();
-        }}
-        className=" flex items-center space-x-3"
+    <header
+      className="fixed top-0 inset-x-0 z-20 flex items-center justify-between gap-2 px-4 py-5
+      border-b border-white/30 dark:border-white/10 supports-[backdrop-filter]:backdrop-blur-xl
+      bg-white/60 dark:bg-slate-950/40 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.45)]"
+    >
+      <button
+        onClick={() => window.location.reload()}
+        className="group flex items-center gap-3 focus:outline-none"
+        aria-label="Reload concierge"
       >
         <ChatAvatar sender="bot" />
-        <div className="flex flex-col space-y-1">
-          <div className="flex space-x-2">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-700 dark:text-gray-300">
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <h1 className="text-[13px] font-semibold uppercase tracking-wide text-slate-700 dark:text-slate-200">
               Zenvana Concierge
-            </h2>
-            <BadgeCheck className="h-5 w-5 text-green-500" />
+            </h1>
+            <BadgeCheck className="h-4 w-4 text-emerald-500" />
           </div>
-          <div className=" space-x-1 flex items-center">
-            <span className="bg-green-500 h-2 w-2 rounded-full inline-block"></span>
-            <span className="text-[10px] text-gray-500 dark:text-gray-400 capitalize">
+          <div className="flex items-center gap-1">
+            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500">
+              <span className="absolute inset-0 rounded-full animate-ping bg-emerald-500/60" />
+            </span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400">
               online
             </span>
           </div>
         </div>
-      </div>
+      </button>
 
-      <div className=" flex space-x-2">
+      <div className="flex items-center gap-2">
         <ModeToggle />
         <Button
           onClick={emptyLocalStorage}
-          variant={"outline"}
-          size={"icon"}
-          className=""
+          variant="outline"
+          size="icon"
+          aria-label="Logout"
+          className="border-white/40 dark:border-white/10 bg-white/40 dark:bg-transparent hover:bg-white/60"
         >
-          <LogOut />
+          <LogOut className="h-4 w-4" />
         </Button>
       </div>
     </header>

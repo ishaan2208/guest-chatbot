@@ -30,7 +30,7 @@ const TypingIndicator: FC<TypingIndicatorProps> = ({
       ? // guest: brand gradient bubble
         "bg-gradient-to-r from-indigo-600 via-purple-600 to-fuchsia-600 text-white"
       : // bot: soft dark bubble
-        "dark:bg-zinc-800/90 dark:text-zinc-100";
+        "dark:bg-transparent ";
 
   return (
     <div className={`flex ${align} py-2`}>

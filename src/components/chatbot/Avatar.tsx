@@ -64,7 +64,7 @@ const ChatAvatar: FC<ChatAvatarProps> = ({
                 ? // ✨ Concierge / bot look: branded gradient
                   "text-white bg-gradient-to-br from-indigo-600 via-purple-600 to-fuchsia-600"
                 : // 👤 Guest look: soft neutral chip
-                  "bg-muted text-foreground"
+                  "bg-muted text-foreground dark:bg-slate-900 dark:text-slate-100"
             )}
           >
             {isBot ? (
