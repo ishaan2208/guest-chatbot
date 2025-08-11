@@ -19,9 +19,9 @@ const Header: FC = () => {
       border-b border-white/30 dark:border-white/10 supports-[backdrop-filter]:backdrop-blur-xl
       bg-white/60 dark:bg-slate-950/40 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.45)]"
     >
-      <button
+      <div
         onClick={() => window.location.reload()}
-        className="group flex items-center gap-3 focus:outline-none p-2 rounded-lg hover:bg-white/60 dark:hover:bg-slate-800/60 transition-colors backdrop-blur-2xl"
+        className="group flex items-center gap-3"
         aria-label="Reload concierge"
       >
         <ChatAvatar sender="bot" />
@@ -41,7 +41,7 @@ const Header: FC = () => {
             </span>
           </div>
         </div>
-      </button>
+      </div>
 
       <div className="flex items-center gap-2">
         {/* <ModeToggle /> */}
