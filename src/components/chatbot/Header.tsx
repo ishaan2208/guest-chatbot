@@ -45,7 +45,7 @@ const Header: FC = () => {
       </button>
 
       <div className="flex items-center gap-2">
-        <ModeToggle />
+        {/* <ModeToggle /> */}
         <Button
           onClick={emptyLocalStorage}
           variant="outline"
