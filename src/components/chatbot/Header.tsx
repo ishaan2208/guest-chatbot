@@ -22,7 +22,7 @@ const Header: FC = () => {
     >
       <button
         onClick={() => window.location.reload()}
-        className="group flex items-center gap-3 focus:outline-none"
+        className="group flex items-center gap-3 focus:outline-none bg-transparent"
         aria-label="Reload concierge"
       >
         <ChatAvatar sender="bot" />
