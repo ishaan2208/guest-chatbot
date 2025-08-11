@@ -12,7 +12,7 @@ const provider = createBrowserRouter([
   {
     path: "/",
     element: (
-      <ThemeProvider defaultTheme="dark" storageKey="zenvana-theme">
+      <ThemeProvider defaultTheme="system" storageKey="zenvana-theme">
         <RecoilRoot>
           <AuthLayout>
             <Outlet />
