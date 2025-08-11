@@ -3,7 +3,6 @@ import { BadgeCheck, LogOut } from "lucide-react";
 import { Button } from "../ui/button";
 import { useNavigate } from "react-router-dom";
 import ChatAvatar from "./Avatar";
-import { ModeToggle } from "../mode-toggle";
 
 const Header: FC = () => {
   const navigate = useNavigate();
