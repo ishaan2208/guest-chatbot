@@ -33,11 +33,11 @@ const Header: FC = () => {
             <BadgeCheck className="h-4 w-4 text-emerald-500" />
           </div>
           <div className="flex items-center gap-1">
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500">
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500">
               <span className="absolute inset-0 rounded-full animate-ping bg-emerald-500/60" />
             </span>
             <span className="text-[10px] text-slate-500 dark:text-slate-400">
-              online
+              Online
             </span>
           </div>
         </div>
