@@ -8,7 +8,7 @@ interface GuestProfile {
   roomNumber?: string;
   checkInDate?: string;
   checkOutDate?: string;
-  
+
   // Preferences
   theme: 'light' | 'dark' | 'system';
   language: string;
@@ -16,13 +16,13 @@ interface GuestProfile {
   soundEffects: boolean;
   hapticFeedback: boolean;
   reducedMotion: boolean;
-  
+
   // Service preferences
   housekeepingTime?: 'morning' | 'afternoon' | 'evening';
   roomTemperature?: number;
   dietaryRestrictions: string[];
   specialRequests: string[];
-  
+
   // Behavioral data (for learning)
   favoriteServices: string[];
   requestHistory: Array<{
@@ -30,7 +30,7 @@ interface GuestProfile {
     timestamp: number;
     completed: boolean;
   }>;
-  
+
   // Session data
   lastActive: number;
   visitCount: number;
@@ -47,7 +47,7 @@ interface GuestProfileState extends GuestProfile {
   updateSession: () => void;
   loadProfile: () => void;
   clearProfile: () => void;
-  
+
   // Computed
   isReturningGuest: boolean;
   getContextualGreeting: () => string;
@@ -107,7 +107,7 @@ export const useGuestProfile = create<GuestProfileState>((set, get) => ({
   addToFavorites: (serviceType) => {
     set((state) => {
       if (state.favoriteServices.includes(serviceType)) return state;
-      
+
       const newFavorites = [...state.favoriteServices, serviceType];
       const newState = { ...state, favoriteServices: newFavorites };
       guestStorage.setProfile(newState);
@@ -126,8 +126,8 @@ export const useGuestProfile = create<GuestProfileState>((set, get) => ({
 
   updateSession: () => {
     set((state) => {
-      const newState = { 
-        ...state, 
+      const newState = {
+        ...state,
         lastActive: Date.now(),
         visitCount: state.visitCount + 1
       };
@@ -157,12 +157,12 @@ export const useGuestProfile = create<GuestProfileState>((set, get) => ({
     const hour = new Date().getHours();
     const isReturning = state.isReturningGuest;
     const guestName = state.guestName;
-    
+
     let timeGreeting = '';
     if (hour < 12) timeGreeting = 'Good morning';
     else if (hour < 17) timeGreeting = 'Good afternoon';
     else timeGreeting = 'Good evening';
-    
+
     if (isReturning && guestName) {
       return `${timeGreeting}, ${guestName}! Welcome back to your room.`;
     } else if (guestName) {
@@ -178,7 +178,7 @@ export const useGuestProfile = create<GuestProfileState>((set, get) => ({
     const state = get();
     const { favoriteServices, requestHistory } = state;
     const hour = new Date().getHours();
-    
+
     // Time-based recommendations
     let timeBasedServices: string[] = [];
     if (hour >= 7 && hour < 11) {
@@ -188,60 +188,60 @@ export const useGuestProfile = create<GuestProfileState>((set, get) => ({
     } else if (hour >= 18 && hour < 22) {
       timeBasedServices = ['TOWELS', 'WATER'];
     }
-    
+
     // Frequency-based recommendations
     const serviceFrequency = requestHistory.reduce((acc, req) => {
       acc[req.type] = (acc[req.type] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-    
+
     const frequentServices = Object.entries(serviceFrequency)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([, a], [, b]) => b - a)
       .slice(0, 3)
       .map(([service]) => service);
-    
+
     // Combine favorites, time-based, and frequent services
     const recommended = [...new Set([
       ...favoriteServices,
       ...timeBasedServices,
       ...frequentServices
     ])];
-    
+
     return recommended.slice(0, 5);
   },
 
   getOptimalServiceTime: (serviceType: string) => {
     const state = get();
     const history = state.requestHistory.filter(req => req.type === serviceType);
-    
+
     if (history.length === 0) {
       // Default optimal times
       const defaultTimes: Record<string, string> = {
         'CLEANING': '10:00 AM',
-        'TOWELS': '2:00 PM', 
+        'TOWELS': '2:00 PM',
         'WATER': '6:00 PM',
         'MAINTENANCE': '11:00 AM',
       };
       return defaultTimes[serviceType] || 'Anytime';
     }
-    
+
     // Find most common hour from history
     const hours = history.map(req => new Date(req.timestamp).getHours());
     const hourCount = hours.reduce((acc, hour) => {
       acc[hour] = (acc[hour] || 0) + 1;
       return acc;
     }, {} as Record<number, number>);
-    
+
     const mostCommonHour = Object.entries(hourCount)
-      .sort(([,a], [,b]) => b - a)[0]?.[0];
-    
+      .sort(([, a], [, b]) => b - a)[0]?.[0];
+
     if (mostCommonHour) {
       const hour = parseInt(mostCommonHour);
       const ampm = hour >= 12 ? 'PM' : 'AM';
       const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
       return `${displayHour}:00 ${ampm}`;
     }
-    
+
     return 'Anytime';
   },
 }));
