@@ -1,15 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useRecoilValue } from "recoil";
+import { Sparkles, Wand2 } from "lucide-react";
+
 import { Card, CardContent } from "@/components/ui/card";
 import ChatWindow from "./ChatWindow";
-import Header from "./Header";
 import { useGuestServiceMenu } from "@/constants/guestService";
 import type { GuestServiceItem } from "@/constants/guestService";
 import type { QuickReply } from "./QuickReplies";
-import { useRecoilValue } from "recoil";
 import { bookingAtom } from "@/store/booking.recoil";
 import { Capitalize } from "@/lib/Capitalize";
 import { ITEM_ICON, CATEGORY_ICON, UI_ICON } from "@/constants/icons";
-import BackgroundFX from "./BackgroundFX";
+import { useGuestProfile } from "@/stores/guestProfile";
+import { ChatSwipeHandler } from "@/components/mobile/swipe-handler";
 
 /** ----------------------------------------------------------------
  * 📨 Local message shape
@@ -24,15 +27,19 @@ interface Message {
  * ----------------------------------------------------------------*/
 export default function GuestChatBot() {
   const guestServiceMenu = useGuestServiceMenu();
-  // 💬 Message timeline
   const [messages, setMessages] = useState<Message[]>([]);
-  // 🔘 Inline quick‑reply chips
   const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
-  // 🧭 Navigation state
   const [categoryIndex, setCategoryIndex] = useState<number | null>(null);
-  console.log("GuestChatBot mounted", categoryIndex);
   const [isTyping, setIsTyping] = useState(false);
+
   const booking = useRecoilValue(bookingAtom);
+  const { getContextualGreeting, getRecommendedServices, addServiceToHistory } =
+    useGuestProfile();
+
+  const recommendedServiceSet = useMemo(
+    () => new Set(getRecommendedServices()),
+    [getRecommendedServices]
+  );
 
   const botSend = (text: string, delay = 500) => {
     setIsTyping(true);
@@ -47,7 +54,6 @@ export default function GuestChatBot() {
    * --------------------------------------------------------------*/
   const push = (msg: Message) => setMessages((prev) => [...prev, msg]);
 
-  // HOME: featured + "Browse all options"
   const buildHomeReplies = (): QuickReply[] => {
     const featured = getFeaturedItems().map((item) => ({
       label: item.isChargeable ? `${item.label} 💰` : item.label,
@@ -59,13 +65,22 @@ export default function GuestChatBot() {
       {
         label: "Explore Services",
         icon: UI_ICON.browse,
-
         onClick: () => {
-          // move to categories view
           setCategoryIndex(null);
           setQuickReplies(buildCategoriesReplies());
           push({ sender: "guest", text: "Browse categories" });
           botSend("Choose a category below 👇");
+        },
+      },
+      {
+        label: "Surprise me",
+        icon: <Wand2 className="h-4 w-4" />,
+        onClick: () => {
+          const items = getFeaturedItems();
+          const random = items[Math.floor(Math.random() * items.length)];
+          push({ sender: "guest", text: "Surprise me" });
+          botSend(`Let's try this: ${random.label}`);
+          handleItem(random);
         },
       },
     ];
@@ -73,11 +88,10 @@ export default function GuestChatBot() {
     return [...featured, ...extras] as QuickReply[];
   };
 
-  // CATEGORIES: list all categories (not featured)
   const buildCategoriesReplies = (): QuickReply[] => {
     const categories = guestServiceMenu.map((cat, idx) => ({
       label: cat.category,
-      icon: CATEGORY_ICON[cat.category], // icon
+      icon: CATEGORY_ICON[cat.category],
       onClick: () => handleCategory(idx),
     }));
 
@@ -97,7 +111,8 @@ export default function GuestChatBot() {
         icon: UI_ICON.help,
         onClick: () =>
           botSend(
-            `No worries! Please call reception at ${booking?.property.receptionNo} `
+            `No worries! Please call reception at ${booking?.property?.receptionNo ?? "100"
+            }`
           ),
       },
     ];
@@ -105,7 +120,6 @@ export default function GuestChatBot() {
     return [...categories, ...extras] as QuickReply[];
   };
 
-  // ITEMS: items inside a category (+ go back)
   const buildItemReplies = (idx: number): QuickReply[] => {
     const replies = guestServiceMenu[idx].items
       .filter((item) => !item.featured)
@@ -140,29 +154,10 @@ export default function GuestChatBot() {
   };
 
   const getFeaturedItems = (): GuestServiceItem[] =>
-    guestServiceMenu.flatMap((cat) => cat.items.filter((i) => i.featured));
+    guestServiceMenu.flatMap((cat) =>
+      cat.items.filter((i) => i.featured || recommendedServiceSet.has(i.type))
+    );
 
-  const buildFeaturedReplies = (): QuickReply[] => {
-    const replies = getFeaturedItems().map((item) => ({
-      label: item.isChargeable ? `${item.label} 💰` : item.label,
-      onClick: () => handleItem(item),
-    }));
-    return [
-      ...replies,
-      {
-        label: "📂 Browse all options",
-        onClick: () => {
-          setQuickReplies(buildCategoriesReplies());
-          push({ sender: "guest", text: "Browse categories" });
-          botSend("Choose a category below 👇");
-        },
-      },
-    ] as QuickReply[];
-  };
-
-  /** --------------------------------------------------------------
-   * Actions
-   * --------------------------------------------------------------*/
   const handleCategory = (idx: number) => {
     setCategoryIndex(idx);
     setQuickReplies(buildItemReplies(idx));
@@ -173,8 +168,8 @@ export default function GuestChatBot() {
   };
 
   const handleItem = async (item: GuestServiceItem) => {
-    setIsTyping(true);
     push({ sender: "guest", text: item.label });
+    setIsTyping(true);
 
     const maybeReply = await item.action();
 
@@ -186,69 +181,70 @@ export default function GuestChatBot() {
       botSend("Thank you for your request! We'll process it shortly.");
     }
 
-    // Optionally clear replies for free‑text follow‑up
+    addServiceToHistory(item.type, true);
+
     if (item.kind === "CHARGEABLE") {
-      await item.action();
-      setQuickReplies(buildFeaturedReplies());
+      setQuickReplies(buildHomeReplies());
     } else {
-      await item.action();
-      // After confirmation, offer to choose another category
       setCategoryIndex(null);
       setQuickReplies(buildHomeReplies());
     }
-
-    // TODO: fetch("/api/guest-service", …) here
   };
 
-  /** --------------------------------------------------------------
-   * Init – greet + categories on mount
-   * --------------------------------------------------------------*/
   useEffect(() => {
     if (messages.length === 0) {
       botSend(
-        `Hi ${Capitalize(
+        `${getContextualGreeting()} ${Capitalize(
           (booking?.guestName.toLowerCase() as string) || "Guest"
         )}! I’m your Zenvana concierge. Quick actions below, or browse categories 👇`,
         0
       );
       setQuickReplies(buildHomeReplies());
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [booking?.guestName]); // intentional narrow dependency
 
-  /** --------------------------------------------------------------
-   * Render
-   * --------------------------------------------------------------*/
+  const onRefresh = () => {
+    setQuickReplies(buildHomeReplies());
+    botSend("Refreshed. Here are your latest quick actions.");
+  };
+
+  const onBack = () => {
+    if (categoryIndex !== null) {
+      setCategoryIndex(null);
+      setQuickReplies(buildCategoriesReplies());
+      botSend("Back to categories.");
+    }
+  };
+
   return (
-    <div className="relative isolate h-[100dvh] pb-[env(safe-area-inset-bottom)] dark:bg-slate-950 bg-gray-100">
-      <BackgroundFX /> {/* ← lives here */}
-      <Header />
-      <div className=" ">
-        <Card
-          className="mx-auto w-full max-w-md 
-  min-h-[calc(100dvh)]
-  border border-white/30 dark:border-white/10
-  bg-white/40 dark:bg-slate-900/30
-  supports-[backdrop-filter]:backdrop-blur-2xl
-  rounded-none shadow-[0_30px_80px_-40px_rgba(0,0,0,0.5)]
-  flex flex-col pt-24"
-        >
-          <CardContent className="flex-1 flex min-h-0 w-full px-2 sm:px-3">
-            {/* bottom glow */}
-            {/* <div
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-40 
-      rounded-none bg-gradient-to-t from-violet-700/30 via-transparent to-transparent"
-            /> */}
+    <ChatSwipeHandler onBack={onBack} canGoBack={categoryIndex !== null} onRefresh={onRefresh}>
+      <Card
+        className="mx-auto mt-2 flex h-full w-full max-w-md flex-col rounded-2xl border border-white/30 bg-white/40 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.5)] supports-backdrop-filter:backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/30 min-h-0"
+      >
+        <CardContent className="flex min-h-0 flex-1 w-full flex-col px-2 sm:px-3 ">
+          <ChatWindow
+            messages={messages}
+            quickReplies={quickReplies}
+            isTyping={isTyping}
+          />
+        </CardContent>
 
-            {/* 🗨 Chat area */}
-            <ChatWindow
-              messages={messages}
-              quickReplies={quickReplies}
-              isTyping={isTyping}
-            />
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        <AnimatePresence>
+          {categoryIndex === null && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 8 }}
+              className="px-4 pb-3 text-center text-xs text-muted-foreground shrink-0"
+            >
+              <div className="inline-flex items-center gap-1">
+                <Sparkles className="h-3.5 w-3.5" />
+                Magical mode enabled: contextual recommendations active
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </Card>
+    </ChatSwipeHandler>
   );
 }

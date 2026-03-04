@@ -1,9 +1,23 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { 
+  Phone, 
+  QrCode, 
+  Sparkles, 
+  CheckCircle, 
+  AlertCircle, 
+  Loader2, 
+  ArrowRight,
+  Smartphone 
+} from "lucide-react";
+
+import { Button } from "../components/ui/button";
 import {
   Form,
   FormControl,
@@ -11,13 +25,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import axios from "@/lib/axios.config";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import Processing from "@/components/Processing";
-import { useState } from "react";
+} from "../components/ui/form";
+import { Input } from "../components/ui/input";
+import axios from "../lib/axios.config";
+import { PageTransition } from "../components/animations/page-transitions";
+import { InteractiveButton, AnimatedText, LoadingDots } from "../components/animations/micro-interactions";
+import { Celebration, useCelebration } from "../components/animations/celebration";
+import { useGuestProfile } from "../stores/guestProfile";
+import { useUIState } from "../stores/ui";
+import { guestStorage } from "../services/storage";
 
 const formSchema = z.object({
   phoneNumber: z
@@ -33,110 +49,420 @@ const formSchema = z.object({
     }),
 });
 
+interface QRSignInState {
+  isProcessing: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+  errorMessage: string;
+}
+
 export default function Login() {
-  //navigate
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { celebrate, celebrations } = useCelebration();
+  const { loadProfile, getContextualGreeting, updateSession } = useGuestProfile();
+  const { addNotification, isMobile } = useUIState();
+
+  // State management
   const [submitDisabled, setSubmitDisabled] = useState(false);
+  const [qrState, setQrState] = useState<QRSignInState>({
+    isProcessing: false,
+    isSuccess: false,
+    isError: false,
+    errorMessage: "",
+  });
 
-  //check localStorage for bookingId and bookingExpiry
-  const bookingId = localStorage.getItem("bookingId");
-  const phoneNumber = localStorage.getItem("phoneNumber");
+  // Get stored credentials
+  const storedSession = guestStorage.getSession();
+  const roomId = searchParams.get('roomId');
 
-  // 1. Define your form.
+  // Form setup
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      phoneNumber: phoneNumber || "",
+      phoneNumber: storedSession?.phoneNumber || "",
     },
   });
 
+  // Handle QR code login on mount
   useEffect(() => {
-    if (bookingId && phoneNumber) {
-      navigate("/room");
-    } else {
-      // If the booking has expired, clear the localStorage
-      localStorage.removeItem("bookingId");
-      localStorage.removeItem("phoneNumber");
-      localStorage.removeItem("roomNumberId");
+    if (roomId && !qrState.isProcessing) {
+      handleQRLogin(roomId);
     }
-  }, [bookingId, navigate, phoneNumber]);
+  }, [roomId]);
 
-  // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-
-    setSubmitDisabled(true);
-    console.log("Form submitted:", values);
-    if (!values.phoneNumber) {
-      console.error("Phone number and room number are required.");
-      return;
+  // Check existing session
+  useEffect(() => {
+    loadProfile();
+    
+    if (storedSession?.bookingId && storedSession?.phoneNumber && !roomId) {
+      // Show welcome back animation
+      celebrate('success', 'Welcome back!');
+      setTimeout(() => navigate("/room"), 1000);
     }
+  }, []);
 
-    axios
-      .post("/chatbot/login", {
-        phoneNumber: values.phoneNumber,
-      })
-      .then((response) => {
-        console.log("Login successful:", response.data.data);
-        // Handle successful login, e.g., redirect to chat page
-        localStorage.setItem("bookingId", response.data.data.id);
-        localStorage.setItem("phoneNumber", values.phoneNumber);
+  // QR code login handler
+  async function handleQRLogin(roomId: string) {
+    setQrState({ isProcessing: true, isSuccess: false, isError: false, errorMessage: "" });
 
-        // Redirect to chat page with bookingId
-        navigate("/room");
-      })
-      .catch((error) => {
-        console.error("Login failed:", error);
-        form.setError("phoneNumber", {
-          type: "manual",
-          message: "Login failed. Please check your phone number.",
-        });
-        // Handle login error, e.g., show an error message
-        if (error.response) {
-          console.error("Error response:", error.response.data);
-        }
-      })
-      .finally(() => {
-        setSubmitDisabled(false);
+    try {
+      const response = await axios.get(`/chatbot/guest-by-room?roomId=${roomId}`);
+      const data = response.data.data;
+
+      // Store session data
+      guestStorage.setSession({
+        bookingId: data.id,
+        phoneNumber: data.guestPhoneNumber,
+        roomNumber: data.roomNumber,
+        guestName: data.guestName,
+        checkInDate: data.BookingRoom?.[0]?.checkIn,
+        checkOutDate: data.BookingRoom?.[0]?.checkOut,
       });
+
+      // Store room number ID for routing
+      if (data.selectedRoomId || data.bookingRoomId) {
+        localStorage.setItem("roomNumberId", String(data.selectedRoomId || data.bookingRoomId));
+      }
+
+      setQrState({ isProcessing: false, isSuccess: true, isError: false, errorMessage: "" });
+      
+      // Celebration and navigation
+      celebrate('confetti', 'Welcome to your room!');
+      updateSession();
+      
+      setTimeout(() => navigate("/room"), 2000);
+
+    } catch (error: any) {
+      console.error("QR login failed:", error);
+      
+      const errorMessage = error.response?.status === 404 
+        ? "No current stay found for this room. Please use your phone number to sign in."
+        : "Something went wrong with QR sign-in. Please try again or use your phone number.";
+
+      setQrState({ 
+        isProcessing: false, 
+        isSuccess: false, 
+        isError: true, 
+        errorMessage 
+      });
+
+      addNotification({
+        title: "QR Sign-in Failed",
+        message: errorMessage,
+        type: "warning",
+        duration: 8000,
+      });
+    }
+  }
+
+  // Phone number form submit
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setSubmitDisabled(true);
+
+    try {
+      const response = await axios.post("/chatbot/login", {
+        phoneNumber: values.phoneNumber,
+      });
+
+      const data = response.data.data;
+      
+      // Store session data
+      guestStorage.setSession({
+        bookingId: data.id,
+        phoneNumber: values.phoneNumber,
+        guestName: data.guestName,
+        checkInDate: data.BookingRoom?.[0]?.checkIn,
+        checkOutDate: data.BookingRoom?.[0]?.checkOut,
+      });
+
+      celebrate('success', 'Login successful!');
+      updateSession();
+      
+      setTimeout(() => navigate("/room"), 1000);
+
+    } catch (error: any) {
+      console.error("Login failed:", error);
+      
+      const errorMessage = error.response?.status === 404
+        ? "No active booking found for this phone number."
+        : "Login failed. Please check your phone number and try again.";
+        
+      form.setError("phoneNumber", {
+        type: "manual",
+        message: errorMessage,
+      });
+
+      // Shake animation for error
+      form.control._fields.phoneNumber?._f.ref?.classList.add('error-shake');
+      setTimeout(() => {
+        form.control._fields.phoneNumber?._f.ref?.classList.remove('error-shake');
+      }, 500);
+
+    } finally {
+      setSubmitDisabled(false);
+    }
+  }
+
+  // Render QR processing state
+  if (roomId && (qrState.isProcessing || qrState.isSuccess)) {
+    return (
+      <PageTransition className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
+        <div className="flex items-center justify-center min-h-screen p-4">
+          <motion.div 
+            className="max-w-md w-full text-center space-y-6"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          >
+            {/* Logo */}
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <img 
+                className="h-24 w-24 mx-auto mb-6" 
+                src="/Zenvana logo.svg" 
+                alt="Zenvana Logo" 
+              />
+            </motion.div>
+
+            {qrState.isProcessing && (
+              <>
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                  className="w-16 h-16 mx-auto"
+                >
+                  <QrCode className="w-full h-full text-primary" />
+                </motion.div>
+                
+                <div className="space-y-2">
+                  <h2 className="text-xl font-semibold text-foreground">
+                    Signing you in<LoadingDots />
+                  </h2>
+                  <p className="text-muted-foreground">
+                    Welcome to your room! We're setting everything up.
+                  </p>
+                </div>
+              </>
+            )}
+
+            {qrState.isSuccess && (
+              <>
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="w-16 h-16 mx-auto text-green-500"
+                >
+                  <CheckCircle className="w-full h-full" />
+                </motion.div>
+                
+                <div className="space-y-2">
+                  <AnimatedText 
+                    text="Welcome to Zenvana!"
+                    className="text-2xl font-bold text-foreground"
+                  />
+                  <p className="text-muted-foreground">
+                    You're all set! Redirecting to your guest services...
+                  </p>
+                </div>
+              </>
+            )}
+          </motion.div>
+        </div>
+        {celebrations}
+      </PageTransition>
+    );
   }
 
   return (
-    <div className="flex items-start justify-center h-screen bg-black">
-      <div className="max-w-md py-20 px-4 flex flex-col items-center justify-start rounded-lg shadow-md w-full">
-        <img className="h-52 w-52" src="/Zenvana logo.svg" alt="Zenvana Logo" />
-        <h1 className="text-xl font-bold mb-6 text-center">Login</h1>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="phoneNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Phone Number</FormLabel>
-                  <FormControl>
-                    <Input
-                      className=" text-white"
-                      placeholder="1234567890"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button
-              disabled={submitDisabled}
-              variant={"secondary"}
-              className="w-full"
-              type="submit"
+    <PageTransition className="min-h-screen">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 flex items-center justify-center p-4">
+        <div className="max-w-md w-full space-y-8">
+          
+          {/* Header Section */}
+          <motion.div 
+            className="text-center space-y-6"
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+          >
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: 5 }}
+              transition={{ type: "spring", stiffness: 300, damping: 10 }}
             >
-              {submitDisabled ? <Processing /> : "Login"}
-            </Button>
-          </form>
-        </Form>
+              <img 
+                className="h-20 w-20 mx-auto" 
+                src="/Zenvana logo.svg" 
+                alt="Zenvana Logo" 
+              />
+            </motion.div>
+            
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">
+                <AnimatedText text="Welcome to Zenvana" />
+              </h1>
+              <p className="text-muted-foreground">
+                {getContextualGreeting()}
+              </p>
+            </div>
+          </motion.div>
+
+          {/* QR Error Message */}
+          <AnimatePresence>
+            {qrState.isError && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                className="bg-warning/10 border border-warning/20 rounded-lg p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-medium text-warning mb-1">QR Sign-in Issue</h3>
+                    <p className="text-sm text-muted-foreground">{qrState.errorMessage}</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Login Form */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-6 shadow-xl"
+          >
+            <div className="space-y-6">
+              
+              {/* QR Code Info */}
+              {!roomId && (
+                <div className="text-center space-y-3">
+                  <div className="inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-full px-3 py-1">
+                    <QrCode className="w-4 h-4" />
+                    <span>Scan the QR code in your room for instant access</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Phone Login */}
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Smartphone className="w-5 h-5 text-primary" />
+                  <h2 className="text-lg font-semibold text-foreground">
+                    Sign in with Phone
+                  </h2>
+                </div>
+
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="phoneNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-foreground">Phone Number</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="tel"
+                              inputMode="numeric"
+                              placeholder="Enter your phone number"
+                              className={`
+                                text-foreground bg-background/50 border-border/50
+                                focus:border-primary focus:ring-primary
+                                transition-all duration-200
+                                ${isMobile ? 'h-12 text-base' : 'h-10'}
+                              `}
+                              autoComplete="tel"
+                            />
+                          </FormControl>
+                          <FormMessage className="text-destructive" />
+                        </FormItem>
+                      )}
+                    />
+
+                    <InteractiveButton
+                      variant={isMobile ? 'touch' : 'default'}
+                      onClick={() => {}}
+                      disabled={submitDisabled}
+                      className={`
+                        w-full bg-primary text-primary-foreground 
+                        hover:bg-primary/90 focus:ring-2 focus:ring-primary
+                        transition-all duration-200
+                        ${isMobile ? 'h-12 text-base' : 'h-10'}
+                        ${submitDisabled ? 'opacity-50 cursor-not-allowed' : ''}
+                      `}
+                    >
+                      <div className="flex items-center justify-center gap-2">
+                        {submitDisabled ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Signing In<LoadingDots /></span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Sign In</span>
+                            <ArrowRight className="w-4 h-4" />
+                          </>
+                        )}
+                      </div>
+                    </InteractiveButton>
+                  </form>
+                </Form>
+              </div>
+
+              {/* Help Text */}
+              <div className="text-center">
+                <p className="text-xs text-muted-foreground">
+                  Enter the phone number used for your booking
+                </p>
+                {!roomId && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Or scan the QR code in your room for instant access
+                  </p>
+                )}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Features Preview */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-center space-y-4"
+          >
+            <p className="text-sm text-muted-foreground">
+              Access guest services instantly
+            </p>
+            <div className="flex justify-center gap-6">
+              {[
+                { icon: "🏨", label: "Room Service" },
+                { icon: "🧹", label: "Housekeeping" },
+                { icon: "🔧", label: "Maintenance" },
+              ].map((feature, index) => (
+                <motion.div
+                  key={feature.label}
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.4 + index * 0.1 }}
+                  className="flex flex-col items-center gap-1"
+                >
+                  <div className="text-xl">{feature.icon}</div>
+                  <span className="text-xs text-muted-foreground">{feature.label}</span>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+        
+        {celebrations}
       </div>
-    </div>
+    </PageTransition>
   );
 }

@@ -27,17 +27,19 @@ const ChatWindow: FC<ChatWindowProps> = ({
   }, [messages, quickReplies]);
 
   return (
-    <div className="flex-1 space-y-3 overflow-y-auto pr-2">
-      {messages.map((msg, idx) => (
-        <Bubble key={idx} sender={msg.sender} text={msg.text} />
-      ))}
-      {isTyping && <Bubble sender="typing" text="" />}
-      {quickReplies.length > 0 && !isTyping && (
-        <QuickReplies replies={quickReplies} />
-      )}
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2 pt-4 pb-20">
+        {messages.map((msg, idx) => (
+          <Bubble key={idx} sender={msg.sender} text={msg.text} />
+        ))}
+        {isTyping && <Bubble sender="typing" text="" />}
+        {quickReplies.length > 0 && !isTyping && (
+          <QuickReplies replies={quickReplies} />
+        )}
 
-      {/* Scroll anchor to ensure we always scroll to the bottom */}
-      <div ref={endRef} />
+        {/* Scroll anchor to ensure we always scroll to the bottom */}
+        <div ref={endRef} />
+      </div>
     </div>
   );
 };

@@ -1,48 +1,51 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { guestStorage } from "@/services/storage";
+import { NotificationToaster } from "@/components/ui/notification-toaster";
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Function to clear localStorage and redirect to login page
   const navigate = useNavigate();
-  //use react-router-dom to search parameters
+  const location = useLocation();
 
-  // Check localStorage for bookingId ,phoneNumber on component mount
+  // Keep auth gate in sync with guestStorage session.
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    //check localStorage for bookingId and phoneNumber
-    const bookingId = localStorage.getItem("bookingId");
-    const phoneNumber = localStorage.getItem("phoneNumber");
+    const session = guestStorage.getSession();
+    const bookingId = session?.bookingId;
+    const phoneNumber = session?.phoneNumber;
     const roomNumberId = localStorage.getItem("roomNumberId");
 
     if (bookingId && phoneNumber) {
-      console.log("Booking found, proceeding to room page.");
-      // If bookingId and phoneNumber are present, proceed to room page
+      if (location.pathname === "/login") {
+        if (roomNumberId) {
+          navigate("/room/chatbot", { replace: true });
+        } else {
+          navigate("/room", { replace: true });
+        }
+      }
+    } else if (searchParams.has("bookingId") && searchParams.has("phoneNumber")) {
+      guestStorage.setSession({
+        bookingId: searchParams.get("bookingId"),
+        phoneNumber: searchParams.get("phoneNumber"),
+      });
+
       if (roomNumberId) {
-        navigate("/room/chatbot");
+        navigate("/room/chatbot", { replace: true });
       } else {
-        navigate("/room");
+        navigate("/room", { replace: true });
       }
-    } else {
-      if (searchParams.has("bookingId") && searchParams.has("phoneNumber")) {
-        // If bookingId and phoneNumber are present in URL, set them in localStorage
-        localStorage.setItem("bookingId", searchParams.get("bookingId")!);
-        localStorage.setItem("phoneNumber", searchParams.get("phoneNumber")!);
-        console.log("Booking found in URL, proceeding to room page.");
-        navigate("/room");
-      } else {
-        // If bookingId and phoneNumber are not present, redirect to login page
-        console.log("No booking found, redirecting to login page.");
-        navigate("/login");
-      }
+    } else if (location.pathname !== "/login") {
+      navigate("/login", { replace: true });
     }
-  }, [navigate]);
+  }, [location.pathname, navigate]);
 
   return (
     <div className="">
+      <NotificationToaster />
       <div> {children}</div>
     </div>
   );

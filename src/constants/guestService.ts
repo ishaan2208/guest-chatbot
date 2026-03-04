@@ -1,6 +1,7 @@
 import { Capitalize } from "@/lib/Capitalize";
 import { bookingAtom } from "@/store/booking.recoil";
 import { useRecoilValue } from "recoil";
+import { useUIState } from "@/stores/ui";
 
 export function useGuestServiceMenu() {
   const booking = useRecoilValue(bookingAtom);
@@ -8,8 +9,8 @@ export function useGuestServiceMenu() {
   // lightweight personalization
   const firstName = Capitalize(
     booking?.guestName?.split(" ")?.[0].toLowerCase() ||
-      booking?.guest?.name?.split(" ")?.[0].toLowerCase() ||
-      "Guest"
+    booking?.guest?.name?.split(" ")?.[0].toLowerCase() ||
+    "Guest"
   );
   let roomNo =
     (typeof window !== "undefined" &&
@@ -363,7 +364,15 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🚨 Emergency: 100 (hotel protocol applies).",
-          action: () => alert("Emergency: 100 / hotel protocol"),
+          action: () => {
+            useUIState.getState().addNotification({
+              title: "Emergency",
+              message: "Dial 100 for emergency. Hotel protocol applies.",
+              type: "warning",
+              duration: 8000,
+            });
+            return "🚨 Emergency: 100 (hotel protocol applies). Please call if you need immediate help.";
+          },
         },
         {
           type: "CHECKOUT_REQUEST",
@@ -453,17 +462,41 @@ import { createTicketFromItem } from "@/lib/api";
 import type { Booking } from "@/types/booking.types";
 
 function ctxFromBooking(booking: Booking, bookingRoomId: string) {
+  const selectedRoom = booking?.BookingRoom?.find((room) => String(room.id) === bookingRoomId);
+  const roomNumber =
+    selectedRoom?.roomNumber ||
+    booking?.BookingRoom?.[0]?.roomNumber ||
+    "N/A";
+
+  // API requires propertyId as number; derive from booking or selected room
+  const rawPropertyId =
+    booking?.propertyId ??
+    (booking as { property?: { id?: number } })?.property?.id ??
+    selectedRoom?.propertyId ??
+    booking?.BookingRoom?.[0]?.propertyId;
+  const propertyId = rawPropertyId != null ? Number(rawPropertyId) : undefined;
+  if (propertyId == null || Number.isNaN(propertyId)) {
+    throw new Error("Missing propertyId for ticket context. Ensure booking data is loaded.");
+  }
+
+  const bookingId =
+    booking?.id != null ? Number(booking.id) : undefined;
+  const roomId =
+    selectedRoom?.roomId != null
+      ? Number(selectedRoom.roomId)
+      : booking?.BookingRoom?.[0]?.roomId != null
+        ? Number(booking.BookingRoom[0].roomId)
+        : undefined;
+  const guestId =
+    booking?.guestId != null ? Number(booking.guestId) : undefined;
+
   return {
-    propertyId: booking?.propertyId ?? null,
-    bookingId: booking?.id ?? null,
-    roomId: booking?.BookingRoom?.[0]?.roomId ?? null,
-    guestId: booking?.guestId ?? null,
+    propertyId,
+    bookingId: bookingId ?? null,
+    roomId: roomId ?? null,
+    guestId: guestId ?? null,
     bookingRoomId,
-    roomNumber:
-      booking?.BookingRoom.find((room) => String(room.id) === bookingRoomId)
-        ?.roomNumber ||
-      booking?.BookingRoom?.[0]?.roomNumber ||
-      "N/A",
+    roomNumber,
   };
 }
 

@@ -15,7 +15,7 @@ const Header: FC = () => {
 
   return (
     <header
-      className="fixed top-0 inset-x-0 z-20 flex items-center justify-between gap-2 px-4 py-5
+      className="fixed top-0 inset-x-0 z-20 flex items-center justify-between gap-1 px-4 py-5
       border-b border-white/30 dark:border-white/10 supports-[backdrop-filter]:backdrop-blur-xl
       bg-white/60 dark:bg-slate-950/40 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.45)]"
     >
