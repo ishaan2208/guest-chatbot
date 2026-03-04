@@ -28,7 +28,7 @@ const ChatWindow: FC<ChatWindowProps> = ({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2 pt-4 pb-20">
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2 pt-6 pb-20">
         {messages.map((msg, idx) => (
           <Bubble key={idx} sender={msg.sender} text={msg.text} />
         ))}
