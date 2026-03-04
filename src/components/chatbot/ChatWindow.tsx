@@ -7,6 +7,7 @@ import type { QuickReply } from "./QuickReplies";
 interface Message {
   sender: "bot" | "guest";
   text: string;
+  sla?: string;
 }
 
 interface ChatWindowProps {
@@ -30,7 +31,7 @@ const ChatWindow: FC<ChatWindowProps> = ({
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2 pt-6 pb-20">
         {messages.map((msg, idx) => (
-          <Bubble key={idx} sender={msg.sender} text={msg.text} />
+          <Bubble key={idx} sender={msg.sender} text={msg.text} sla={msg.sla} />
         ))}
         {isTyping && <Bubble sender="typing" text="" />}
         {quickReplies.length > 0 && !isTyping && (

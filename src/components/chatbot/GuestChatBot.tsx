@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRecoilValue } from "recoil";
 import { Sparkles } from "lucide-react";
@@ -20,6 +20,57 @@ import { ChatSwipeHandler } from "@/components/mobile/swipe-handler";
 interface Message {
   sender: "bot" | "guest";
   text: string;
+  /** Optional SLA/time shown under bot reply (e.g. "Within 15 min" or from backend) */
+  sla?: string;
+}
+
+function formatDueAt(iso: string): string {
+  try {
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return "";
+    return `By ${d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}`;
+  } catch {
+    return "";
+  }
+}
+
+const CHAT_STORAGE_KEY_PREFIX = "guest-chatbot-history";
+const MAX_STORED_MESSAGES = 200;
+
+function getStorageKey(bookingId: string | number | null | undefined): string {
+  return `${CHAT_STORAGE_KEY_PREFIX}-${bookingId ?? "default"}`;
+}
+
+function loadChatFromStorage(key: string): { messages: Message[]; categoryIndex: number | null } {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return { messages: [], categoryIndex: null };
+    const data = JSON.parse(raw) as unknown;
+    if (!data || typeof data !== "object" || !Array.isArray((data as { messages?: unknown }).messages))
+      return { messages: [], categoryIndex: null };
+    const { messages, categoryIndex } = data as { messages: Message[]; categoryIndex?: number | null };
+    const list = Array.isArray(messages) ? messages : [];
+    const valid = list.filter(
+      (m) => m && typeof m.sender === "string" && typeof m.text === "string" && (m.sender === "bot" || m.sender === "guest")
+    ).map((m) => ({ ...m, sla: typeof (m as Message).sla === "string" ? (m as Message).sla : undefined }));
+    const idx = typeof categoryIndex === "number" && Number.isInteger(categoryIndex) ? categoryIndex : null;
+    return { messages: valid, categoryIndex: idx };
+  } catch {
+    return { messages: [], categoryIndex: null };
+  }
+}
+
+function saveChatToStorage(
+  key: string,
+  messages: Message[],
+  categoryIndex: number | null
+): void {
+  try {
+    const toSave = messages.slice(-MAX_STORED_MESSAGES);
+    localStorage.setItem(key, JSON.stringify({ messages: toSave, categoryIndex }));
+  } catch {
+    // ignore quota or parse errors
+  }
 }
 
 /** ----------------------------------------------------------------
@@ -31,8 +82,11 @@ export default function GuestChatBot() {
   const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
   const [categoryIndex, setCategoryIndex] = useState<number | null>(null);
   const [isTyping, setIsTyping] = useState(false);
+  const [restoreAttempted, setRestoreAttempted] = useState(false);
+  const sentGreetingRef = useRef(false);
 
   const booking = useRecoilValue(bookingAtom);
+  const storageKey = getStorageKey(booking?.id ?? null);
   const { getContextualGreeting, getRecommendedServices, addServiceToHistory } =
     useGuestProfile();
 
@@ -41,10 +95,10 @@ export default function GuestChatBot() {
     [getRecommendedServices]
   );
 
-  const botSend = (text: string, delay = 500) => {
+  const botSend = (text: string, delay = 500, sla?: string) => {
     setIsTyping(true);
     setTimeout(() => {
-      push({ sender: "bot", text });
+      push({ sender: "bot", text, sla });
       setIsTyping(false);
     }, delay);
   };
@@ -161,13 +215,19 @@ export default function GuestChatBot() {
     setIsTyping(true);
 
     const maybeReply = await item.action();
+    const backendSla = maybeReply && typeof maybeReply === "object" && "slaMinutes" in maybeReply
+      ? `Within ${(maybeReply as { slaMinutes: number }).slaMinutes} min`
+      : maybeReply && typeof maybeReply === "object" && "dueAt" in maybeReply
+        ? formatDueAt((maybeReply as { dueAt: string }).dueAt)
+        : undefined;
+    const sla = backendSla ?? (item.etaMinutes != null ? `Within ${item.etaMinutes} min` : undefined);
 
     if (typeof maybeReply === "string") {
-      botSend(maybeReply);
+      botSend(maybeReply, 500, sla);
     } else if (item.reply) {
-      botSend(item.reply);
+      botSend(item.reply, 500, sla);
     } else {
-      botSend("Thank you for your request! We'll process it shortly.");
+      botSend("Thank you for your request! We'll process it shortly.", 500, sla);
     }
 
     addServiceToHistory(item.type, true);
@@ -180,17 +240,43 @@ export default function GuestChatBot() {
     }
   };
 
+  // Restore chat history from localStorage when storage key or menu is ready
+  const lastRestoredKeyRef = useRef<string | null>(null);
   useEffect(() => {
-    if (messages.length === 0) {
-      botSend(
-        `${getContextualGreeting()} ${Capitalize(
-          (booking?.guestName.toLowerCase() as string) || "Guest"
-        )}! I’m your Zenvana concierge. Quick actions below, or browse categories 👇`,
-        0
+    if (lastRestoredKeyRef.current === storageKey || !guestServiceMenu?.length) return;
+    const saved = loadChatFromStorage(storageKey);
+    if (saved.messages.length > 0) {
+      setMessages(saved.messages);
+      setCategoryIndex(saved.categoryIndex);
+      setQuickReplies(
+        saved.categoryIndex === null
+          ? buildHomeReplies()
+          : buildItemReplies(saved.categoryIndex)
       );
-      setQuickReplies(buildHomeReplies());
     }
-  }, [booking?.guestName]); // intentional narrow dependency
+    lastRestoredKeyRef.current = storageKey;
+    setRestoreAttempted(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- buildHomeReplies/buildItemReplies are stable enough; full deps cause loops
+  }, [storageKey, guestServiceMenu]);
+
+  // Persist to localStorage when messages or category change
+  useEffect(() => {
+    saveChatToStorage(storageKey, messages, categoryIndex);
+  }, [storageKey, messages, categoryIndex]);
+
+  // Initial greeting only after restore attempted and no messages (send once)
+  useEffect(() => {
+    if (!restoreAttempted || messages.length > 0 || sentGreetingRef.current) return;
+    sentGreetingRef.current = true;
+    botSend(
+      `${getContextualGreeting()} ${Capitalize(
+        (booking?.guestName.toLowerCase() as string) || "Guest"
+      )}! I’m your Zenvana concierge. Quick actions below, or browse categories 👇`,
+      0
+    );
+    setQuickReplies(buildHomeReplies());
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional narrow deps; full deps would re-send greeting
+  }, [booking?.guestName, restoreAttempted]);
 
   const onRefresh = () => {
     setQuickReplies(buildHomeReplies());
@@ -208,9 +294,9 @@ export default function GuestChatBot() {
   return (
     <ChatSwipeHandler onBack={onBack} canGoBack={categoryIndex !== null} onRefresh={onRefresh}>
       <Card
-        className="mx-auto mt-2 flex h-full w-full max-w-md flex-col border-0 bg-transparent shadow-[0_30px_80px_-40px_rgba(0,0,0,0.5)] supports-backdrop-filter:backdrop-blur-2xl min-h-0"
+        className="mx-auto mt-2 flex h-full w-full max-w-md flex-col border-0 bg-transparent min-h-0"
       >
-        <CardContent className="flex min-h-0 flex-1 w-full flex-col px-2 sm:px-3 ">
+        <CardContent className="flex min-h-0 flex-1 w-full flex-col px-1 sm:px-0.5 ">
           <ChatWindow
             messages={messages}
             quickReplies={quickReplies}

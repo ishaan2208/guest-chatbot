@@ -6,9 +6,11 @@ import { motion } from "framer-motion";
 export default function Bubble({
   sender,
   text,
+  sla,
 }: {
   sender: "bot" | "guest" | "typing";
   text: string;
+  sla?: string;
 }) {
   const isGuest = sender === "guest";
 
@@ -49,10 +51,15 @@ export default function Bubble({
             "after:absolute after:bottom-[-6px] after:w-4 after:h-5  after:content-['']",
             isGuest
               ? "after:right-[0px] after:clip-path-[polygon(100%_0,0_0,0_100%)] after:rounded-bl-[10px]  after:bg-violet-700 "
-              : "after:left-[0px] dark:after:bg-slate-800 after:bg-white  after:clip-path-[polygon(100%_0,100%_0,100%_100%)] after:rounded-br-[10px]"
+              :             "after:left-[0px] dark:after:bg-slate-800 after:bg-white  after:clip-path-[polygon(100%_0,100%_0,100%_100%)] after:rounded-br-[10px]"
           )}
         >
-          {text}
+          <span className="block">{text}</span>
+          {sla && sender === "bot" && (
+            <span className="mt-1.5 block text-xs opacity-80">
+              ⏱ {sla}
+            </span>
+          )}
         </span>
         {sender === "guest" && <ChatAvatar sender="guest" />}
       </div>

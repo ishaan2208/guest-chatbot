@@ -36,7 +36,7 @@ export function useGuestServiceMenu() {
           featured: true,
           isChargeable: false,
           reply: `📶 Hey ${firstName}, Wi-Fi pass: ${wifiPass}`,
-          action: () => {
+          action: (_details?: string) => {
             console.log();
             console.log("g", localStorage.getItem("roomNumberId"));
             return null;
@@ -45,10 +45,14 @@ export function useGuestServiceMenu() {
         {
           type: "EXTRA_TOWELS",
           label: "More towels",
+          tileTitle: "Fresh Towels",
+          description: "Delivered to your room shortly",
+          etaMinutes: 15,
+          handledBy: "Housekeeping",
           kind: "FUNCTION",
           featured: true,
           isChargeable: false,
-          reply: `🧺 On it! Towels to ${roomNo}.`,
+          reply: `Certainly. Fresh towels have been requested for ${roomNo}. They should arrive shortly. Would you also like water bottles?`,
           action: async () => {
             setTimeout(() => {
               console.log("Requesting extra towels for:", roomNo);
@@ -63,7 +67,7 @@ export function useGuestServiceMenu() {
               localStorage.getItem("roomNumberId")
             );
             if (action.existed) {
-              return "Request already sent. We’ll send towels to " + roomNo;
+              return "Certainly. We already have a request for towels to " + roomNo + ". They should arrive shortly.";
             } else {
               return;
             }
@@ -72,22 +76,39 @@ export function useGuestServiceMenu() {
         {
           type: "WATER_REFILL",
           label: "Water top-up",
+          tileTitle: "Water Bottles",
+          description: "Delivered to your room shortly",
+          etaMinutes: 10,
           kind: "FUNCTION",
           featured: true,
           isChargeable: false,
-          reply: `💧 Water coming to ${roomNo}.`,
-          action: () =>
-            actionableAction(bookingRoomId, booking as Booking, "WATER"),
+          secondaryOptions: [
+            { label: "1 bottle", value: "1" },
+            { label: "2 bottles", value: "2" },
+            { label: "4 bottles", value: "4" },
+          ],
+          reply: `Certainly. Water has been requested for ${roomNo}. It should arrive shortly. Anything else?`,
+          action: (details?: string) =>
+            actionableAction(bookingRoomId, booking as Booking, "WATER", false, details),
         },
         {
           type: "ROOM_CLEANING",
           label: "Clean my room",
+          tileTitle: "Housekeeping",
+          description: "Schedule a room refresh",
+          etaMinutes: 30,
+          handledBy: "Housekeeping",
           kind: "FUNCTION",
-          featured: false,
+          featured: true,
           isChargeable: false,
-          reply: "🧹 Noted. Housekeeping will come shortly.",
-          action: () =>
-            actionableAction(bookingRoomId, booking as Booking, "CLEANING"),
+          secondaryOptions: [
+            { label: "Now", value: "now" },
+            { label: "In 30 minutes", value: "in_30_min" },
+            { label: "This evening", value: "evening" },
+          ],
+          reply: "Certainly. Housekeeping has been notified and will attend to your room shortly.",
+          action: (details?: string) =>
+            actionableAction(bookingRoomId, booking as Booking, "CLEANING", false, details),
         },
         {
           type: "SOAP_REQUEST",
@@ -95,8 +116,9 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "🧼 Sending soap refillnow.",
-          action: () =>
+          etaMinutes: 15,
+          reply: "Certainly. Soap refill has been requested. It will be delivered shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "SOAP"),
         },
         {
@@ -105,8 +127,9 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "🚿 Body wash on the way.",
-          action: () =>
+          etaMinutes: 15,
+          reply: "Certainly. Body wash has been requested. It will be delivered shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "BODY_WASH"),
         },
         {
@@ -115,8 +138,8 @@ export function useGuestServiceMenu() {
           kind: "CHARGEABLE",
           featured: false,
           isChargeable: true,
-          reply: `🩴 Paid item. We’ll send it to ${roomNo}.`,
-          action: () =>
+          reply: `Certainly. This will be added to your room bill. Slippers will be sent to ${roomNo} shortly.`,
+          action: (_details?: string) =>
             actionableAction(
               bookingRoomId,
               booking as Booking,
@@ -130,8 +153,8 @@ export function useGuestServiceMenu() {
           kind: "CHARGEABLE",
           featured: false,
           isChargeable: true,
-          reply: `🪥 Paid item. Dental kit to ${roomNo}.`,
-          action: () =>
+          reply: `Certainly. This will be added to your room bill. Dental kit will be sent to ${roomNo} shortly.`,
+          action: (_details?: string) =>
             actionableAction(
               bookingRoomId,
               booking as Booking,
@@ -145,8 +168,8 @@ export function useGuestServiceMenu() {
           kind: "CHARGEABLE",
           featured: false,
           isChargeable: true,
-          reply: `🪒 Paid item. Shaving kit to ${roomNo}.`,
-          action: () =>
+          reply: `Certainly. This will be added to your room bill. Shaving kit will be sent to ${roomNo} shortly.`,
+          action: (_details?: string) =>
             actionableAction(
               bookingRoomId,
               booking as Booking,
@@ -160,8 +183,8 @@ export function useGuestServiceMenu() {
           kind: "CHARGEABLE",
           featured: false,
           isChargeable: true,
-          reply: `🧻 Paid item. Pads to ${roomNo}.`,
-          action: () =>
+          reply: `Certainly. This will be added to your room bill. Sanitary pads will be sent to ${roomNo} shortly.`,
+          action: (_details?: string) =>
             actionableAction(
               bookingRoomId,
               booking as Booking,
@@ -175,8 +198,9 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
+          etaMinutes: 20,
           reply: "🧺 We’ll send an iron + board.",
-          action: () =>
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "IRON"),
         },
         {
@@ -185,8 +209,9 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "🛏️ Extra bedding coming up.",
-          action: () =>
+          etaMinutes: 15,
+          reply: "Certainly. Extra pillow and blanket have been requested. They should arrive shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "BLANKET"),
         },
       ],
@@ -201,8 +226,9 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "📺 Noted. We’ll check the TV.",
-          action: () =>
+          etaMinutes: 30,
+          reply: "📺 Certainly. We've notified maintenance. They will check the TV shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "TV"),
         },
         {
@@ -211,8 +237,9 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "🚽 Got it. We’ll fix the flush.",
-          action: () =>
+          etaMinutes: 45,
+          reply: "🚽 Certainly. We've reported the flush issue. Maintenance will attend to it shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "FLUSH"),
         },
         {
@@ -221,8 +248,9 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "❄️ Tech will check the AC.",
-          action: () =>
+          etaMinutes: 30,
+          reply: "Certainly. We've notified maintenance. They will check the AC shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "AC"),
         },
         {
@@ -231,8 +259,9 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "💡 We’ll fix the lights.",
-          action: () =>
+          etaMinutes: 25,
+          reply: "💡 Certainly. We've reported the lights issue. Maintenance will attend shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "LIGHTS"),
         },
         {
@@ -241,8 +270,8 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "♨️ Checking the geyser.",
-          action: () =>
+          reply: "Certainly. We've reported the geyser issue. Maintenance will attend shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "GEYSER"),
         },
         {
@@ -251,8 +280,8 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "🔌 We’ll look at the socket.",
-          action: () =>
+          reply: "🔌 Certainly. We've reported the socket issue. Maintenance will attend shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "SOCKET"),
         },
         {
@@ -261,8 +290,8 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "🧊 We’ll check the fridge.",
-          action: () =>
+          reply: "🧊 Certainly. We've reported the fridge issue. Maintenance will attend shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "FRIDGE"),
         },
         {
@@ -271,8 +300,8 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "🌀 Fixing the fan soon.",
-          action: () =>
+          reply: "Certainly. We've reported the fan issue. Maintenance will attend shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "FAN"),
         },
       ],
@@ -284,11 +313,13 @@ export function useGuestServiceMenu() {
         {
           type: "ORDER_FOOD",
           label: "Order food (opens app)",
+          tileTitle: "In-Room Dining",
+          description: "Browse available dining options",
           kind: "REDIRECT",
-          featured: false,
+          featured: true,
           isChargeable: false,
-          reply: "🍽️ Opening the menu…",
-          action: () => window.open("https://order.zenvana.in", "_blank"),
+          reply: "Certainly. Opening the menu.",
+          action: (_details?: string) => window.open("https://order.zenvana.in", "_blank"),
         },
         {
           type: "FOOD_CLEARANCE",
@@ -297,7 +328,7 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🧹 We’ll clear it now.",
-          action: () =>
+          action: (_details?: string) =>
             actionableAction(
               bookingRoomId,
               booking as Booking,
@@ -310,8 +341,8 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "👶 Kids meal noted.",
-          action: () =>
+          reply: "Certainly. Kids meal has been noted. We'll arrange it shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "KIDS_MEAL"),
         },
         {
@@ -320,8 +351,8 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "🌱 Jain/custom meal noted.",
-          action: () =>
+          reply: "Certainly. Jain or custom meal has been noted. We'll arrange it shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "JAIN_MEAL"),
         },
         {
@@ -330,8 +361,8 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "📅 We’ll arrange a table and confirm.",
-          action: () =>
+          reply: "📅 Certainly. We've noted your table booking request. We'll confirm shortly.",
+          action: (_details?: string) =>
             actionableAction(
               bookingRoomId,
               booking as Booking,
@@ -347,11 +378,14 @@ export function useGuestServiceMenu() {
         {
           type: "CALL_RECEPTION",
           label: "Call reception",
+          tileTitle: "Front Desk",
+          description: "Call or request assistance",
+          handledBy: "Front Desk",
           kind: "FUNCTION",
-          featured: false,
+          featured: true,
           isChargeable: false,
-          reply: "🛎️ Connecting you to reception.",
-          action: () => {
+          reply: "Certainly. Connecting you to reception.",
+          action: (_details?: string) => {
             const phoneNumber = booking?.property?.receptionNo || "100";
 
             window.open(`tel:${phoneNumber}`, "_self");
@@ -364,7 +398,7 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🚨 Emergency: 100 (hotel protocol applies).",
-          action: () => {
+          action: (_details?: string) => {
             useUIState.getState().addNotification({
               title: "Emergency",
               message: "Dial 100 for emergency. Hotel protocol applies.",
@@ -380,8 +414,8 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "🧳 Got it. We’ll start your checkout.",
-          action: () =>
+          reply: "🧳 Certainly. We've started your checkout. Our team will assist you shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "CHECKOUT"),
         },
         {
@@ -390,8 +424,8 @@ export function useGuestServiceMenu() {
           kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "🪪 No worries—reissuing your key.",
-          action: () =>
+          reply: "Certainly. We've requested a replacement key. It will be with you shortly.",
+          action: (_details?: string) =>
             actionableAction(bookingRoomId, booking as Booking, "KEYCARD"),
         },
         {
@@ -401,7 +435,7 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🚕 Opening taxi booking…",
-          action: () => window.open("https://taxi.example.com", "_blank"),
+          action: (_details?: string) => window.open("https://taxi.example.com", "_blank"),
         },
       ],
     },
@@ -442,13 +476,27 @@ export type ServiceKey =
   | "BOOK_TAXI";
 
 export interface GuestServiceItem {
-  type: ServiceKey; // Ensures `type` is one of the values in SERVICE_KEYS
+  type: ServiceKey;
   label: string;
   kind: "FUNCTION" | "CHARGEABLE" | "REDIRECT";
   featured: boolean;
   isChargeable: boolean;
-  action: () => void | Promise<void> | unknown;
+  action: (details?: string) => void | Promise<void> | unknown;
   reply?: string;
+  /** Optional second-step choices (e.g. timing or quantity); when set, UI shows chips before calling action(details) */
+  secondaryOptions?: ReadonlyArray<{ label: string; value: string }>;
+  /** For service tiles on Home: short title when different from label */
+  tileTitle?: string;
+  /** One-line description for tiles */
+  description?: string;
+  /** Typical delivery/response time in minutes */
+  etaMinutes?: number;
+  /** e.g. "Added to room bill" */
+  chargeableNote?: string;
+  /** e.g. "11:00 PM" */
+  availableUntil?: string;
+  /** e.g. "Housekeeping", "Front Desk" */
+  handledBy?: string;
 }
 
 export interface GuestServiceCategory {

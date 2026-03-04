@@ -10,6 +10,7 @@ import { ThemeProvider } from "./components/theme-provider.tsx";
 import { RecoilRoot } from "recoil";
 import RoomPage from "./pages/Room.page.tsx";
 import AuthLayout from "./components/Authlayout.tsx";
+import ErrorFallback from "./components/ErrorFallback.tsx";
 import { registerServiceWorker } from "./services/pwa.ts";
 
 const provider = createBrowserRouter([
@@ -22,6 +23,11 @@ const provider = createBrowserRouter([
             <Outlet />
           </AuthLayout>
         </RecoilRoot>
+      </ThemeProvider>
+    ),
+    errorElement: (
+      <ThemeProvider defaultTheme="system" storageKey="zenvana-theme">
+        <ErrorFallback />
       </ThemeProvider>
     ),
     children: [
