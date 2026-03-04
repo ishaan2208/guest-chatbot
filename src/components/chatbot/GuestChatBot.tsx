@@ -208,7 +208,7 @@ export default function GuestChatBot() {
   return (
     <ChatSwipeHandler onBack={onBack} canGoBack={categoryIndex !== null} onRefresh={onRefresh}>
       <Card
-        className="mx-auto mt-2 flex h-full w-full max-w-md flex-col rounded-2xl border border-white/30 bg-white/40 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.5)] supports-backdrop-filter:backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/30 min-h-0"
+        className="mx-auto mt-2 flex h-full w-full max-w-md flex-col border-0 bg-transparent shadow-[0_30px_80px_-40px_rgba(0,0,0,0.5)] supports-backdrop-filter:backdrop-blur-2xl min-h-0"
       >
         <CardContent className="flex min-h-0 flex-1 w-full flex-col px-2 sm:px-3 ">
           <ChatWindow
