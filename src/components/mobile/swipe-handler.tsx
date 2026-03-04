@@ -127,7 +127,7 @@ export function ChatSwipeHandler({
     <SwipeHandler
       onSwipeRight={canGoBack ? onBack : undefined}
       onRefresh={onRefresh}
-      showBackIndicator={canGoBack}
+      showBackIndicator={false}
       enablePullToRefresh={!!onRefresh}
     >
       {children}

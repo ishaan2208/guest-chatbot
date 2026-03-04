@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRecoilValue } from "recoil";
-import { Sparkles, Wand2 } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import ChatWindow from "./ChatWindow";
@@ -70,17 +70,6 @@ export default function GuestChatBot() {
           setQuickReplies(buildCategoriesReplies());
           push({ sender: "guest", text: "Browse categories" });
           botSend("Choose a category below 👇");
-        },
-      },
-      {
-        label: "Surprise me",
-        icon: <Wand2 className="h-4 w-4" />,
-        onClick: () => {
-          const items = getFeaturedItems();
-          const random = items[Math.floor(Math.random() * items.length)];
-          push({ sender: "guest", text: "Surprise me" });
-          botSend(`Let's try this: ${random.label}`);
-          handleItem(random);
         },
       },
     ];
