@@ -14,7 +14,7 @@ export default function AuthLayout({
   // Keep auth gate in sync with guestStorage session.
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    const session = guestStorage.getSession();
+    const session = guestStorage.getSession() as { bookingId?: string | number; phoneNumber?: string } | undefined;
     const bookingId = session?.bookingId;
     const phoneNumber = session?.phoneNumber;
     const roomNumberId = localStorage.getItem("roomNumberId");

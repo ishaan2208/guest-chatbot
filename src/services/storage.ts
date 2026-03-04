@@ -35,7 +35,7 @@ class AdvancedStorage {
     const now = Date.now();
     
     const item: StorageItem<T> = {
-      data: options.encrypt ? this.encrypt(value) : value,
+      data: (options.encrypt ? this.encrypt(value as unknown) : value) as T,
       timestamp: now,
       expiry: options.expiry ? now + options.expiry : undefined,
       encrypted: options.encrypt,
@@ -72,8 +72,8 @@ class AdvancedStorage {
       }
 
       // Decrypt if needed
-      const data = item.encrypted ? this.decrypt(item.data) : item.data;
-      return data !== undefined ? data : defaultValue;
+      const data = item.encrypted ? this.decrypt(item.data as unknown as string) : item.data;
+      return (data !== undefined ? data : defaultValue) as T | undefined;
     } catch (error) {
       console.error('Storage read error:', error);
       return defaultValue;
@@ -238,8 +238,8 @@ export const guestStorage = {
     });
   },
   
-  getConversation(conversationId: string) {
-    return storage.get(`conversation_${conversationId}`, []);
+  getConversation(conversationId: string): unknown[] {
+    return (storage.get(`conversation_${conversationId}`, []) as unknown[]) ?? [];
   },
 
   // Service requests cache

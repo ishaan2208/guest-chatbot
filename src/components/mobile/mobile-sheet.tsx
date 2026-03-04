@@ -1,8 +1,8 @@
 import React from 'react';
-import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { X, GripHorizontal } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import type { PanInfo } from 'framer-motion';
+import { X } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { useTouch } from '../../hooks/useTouch';
 import { Button } from '../ui/button';
 
 interface MobileSheetProps {
@@ -32,7 +32,7 @@ export function MobileSheet({
   showCloseButton = true,
   closeOnBackdrop = true,
 }: MobileSheetProps) {
-  const [currentSnap, setCurrentSnap] = React.useState(defaultSnap);
+  const [currentSnap] = React.useState(defaultSnap);
   const sheetRef = React.useRef<HTMLDivElement>(null);
 
   // Handle drag to close
@@ -66,20 +66,13 @@ export function MobileSheet({
   };
 
   const sheetVariants = {
-    hidden: { 
+    hidden: {
       y: '100%',
-      transition: {
-        type: 'tween',
-        duration: 0.3,
-      }
+      transition: { type: 'tween' as const, duration: 0.3 },
     },
-    visible: { 
+    visible: {
       y: 0,
-      transition: {
-        type: 'spring',
-        stiffness: 400,
-        damping: 40,
-      }
+      transition: { type: 'spring' as const, stiffness: 400, damping: 40 },
     },
   };
 

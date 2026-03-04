@@ -95,22 +95,14 @@ export function SidebarNav({ className }: SidebarNavProps) {
   ];
 
   const sidebarVariants = {
-    open: { 
+    open: {
       x: 0,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 30
-      }
+      transition: { type: "spring" as const, stiffness: 300, damping: 30 },
     },
-    closed: { 
+    closed: {
       x: -280,
-      transition: {
-        type: "spring",
-        stiffness: 300,
-        damping: 30
-      }
-    }
+      transition: { type: "spring" as const, stiffness: 300, damping: 30 },
+    },
   };
 
   return (

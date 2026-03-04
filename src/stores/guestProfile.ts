@@ -137,11 +137,11 @@ export const useGuestProfile = create<GuestProfileState>((set, get) => ({
   },
 
   loadProfile: () => {
-    const stored = guestStorage.getProfile();
+    const stored = guestStorage.getProfile() as Partial<GuestProfile> & { visitCount?: number } | undefined;
     if (stored) {
       set({
         ...stored,
-        isReturningGuest: stored.visitCount > 1,
+        isReturningGuest: (stored.visitCount ?? 0) > 1,
         sessionStart: Date.now(),
       });
     }
@@ -180,7 +180,7 @@ export const useGuestProfile = create<GuestProfileState>((set, get) => ({
     const hour = new Date().getHours();
     
     // Time-based recommendations
-    let timeBasedServices = [];
+    let timeBasedServices: string[] = [];
     if (hour >= 7 && hour < 11) {
       timeBasedServices = ['TOWELS', 'CLEANING'];
     } else if (hour >= 11 && hour < 14) {

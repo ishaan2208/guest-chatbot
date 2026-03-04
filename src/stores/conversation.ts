@@ -208,11 +208,11 @@ export const useConversation = create<ConversationState>((set, get) => ({
 
   loadConversation: (id) => {
     const conversationId = id || get().conversationId;
-    const messages = guestStorage.getConversation(conversationId);
+    const messages = guestStorage.getConversation(conversationId) ?? [];
     
     if (messages.length > 0) {
-      set({ 
-        messages,
+      set({
+        messages: messages as Message[],
         conversationId,
       });
     }

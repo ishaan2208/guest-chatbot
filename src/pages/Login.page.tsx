@@ -1,20 +1,18 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { 
-  Phone, 
-  QrCode, 
-  Sparkles, 
-  CheckCircle, 
-  AlertCircle, 
-  Loader2, 
+import {
+  QrCode,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
   ArrowRight,
-  Smartphone 
+  Smartphone,
 } from "lucide-react";
 
 import { Button } from "../components/ui/button";
@@ -30,7 +28,7 @@ import { Input } from "../components/ui/input";
 import axios from "../lib/axios.config";
 import { PageTransition } from "../components/animations/page-transitions";
 import { InteractiveButton, AnimatedText, LoadingDots } from "../components/animations/micro-interactions";
-import { Celebration, useCelebration } from "../components/animations/celebration";
+import { useCelebration } from "../components/animations/celebration";
 import { useGuestProfile } from "../stores/guestProfile";
 import { useUIState } from "../stores/ui";
 import { guestStorage } from "../services/storage";
@@ -73,14 +71,14 @@ export default function Login() {
   });
 
   // Get stored credentials
-  const storedSession = guestStorage.getSession();
+  const storedSession = guestStorage.getSession() as { bookingId?: string | number; phoneNumber?: string } | undefined;
   const roomId = searchParams.get('roomId');
 
   // Form setup
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      phoneNumber: storedSession?.phoneNumber || "",
+      phoneNumber: (storedSession?.phoneNumber as string) || "",
     },
   });
 
@@ -194,10 +192,10 @@ export default function Login() {
       });
 
       // Shake animation for error
-      form.control._fields.phoneNumber?._f.ref?.classList.add('error-shake');
-      setTimeout(() => {
-        form.control._fields.phoneNumber?._f.ref?.classList.remove('error-shake');
-      }, 500);
+      const field = form.control._fields.phoneNumber;
+      const inputEl = field && '_f' in field ? (field as { _f?: { ref?: HTMLElement } })._f?.ref : undefined;
+      inputEl?.classList?.add('error-shake');
+      setTimeout(() => inputEl?.classList?.remove('error-shake'), 500);
 
     } finally {
       setSubmitDisabled(false);

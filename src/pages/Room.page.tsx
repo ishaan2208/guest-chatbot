@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useSetRecoilState } from "recoil";
 import {
   Home,
@@ -18,7 +18,7 @@ import {
 
 import axios from "../lib/axios.config";
 import { Button } from "../components/ui/button";
-import { PageTransition, LoadingTransition, StaggeredList } from "../components/animations/page-transitions";
+import { PageTransition, StaggeredList } from "../components/animations/page-transitions";
 import { InteractiveCard, AnimatedText } from "../components/animations/micro-interactions";
 import { useCelebration } from "../components/animations/celebration";
 import { useGuestProfile } from "../stores/guestProfile";
@@ -159,7 +159,7 @@ export default function RoomPage() {
   const location = useLocation();
   const { celebrate, celebrations } = useCelebration();
   const { updateProfile, getContextualGreeting } = useGuestProfile();
-  const { isMobile, addNotification } = useUIState();
+  const { addNotification } = useUIState();
   const setBookingStore = useSetRecoilState(bookingAtom);
   const isChatbotRoute = location.pathname.startsWith("/room/chatbot");
 
@@ -509,7 +509,7 @@ export default function RoomPage() {
             </h2>
 
             <StaggeredList className="space-y-4">
-              {booking.BookingRoom.map((room, index) => (
+              {booking.BookingRoom.map((room) => (
                 <motion.div key={room.id}>
                   <InteractiveCard
                     onClick={() => handleRoomClick(String(room.id), room.roomNumber)}

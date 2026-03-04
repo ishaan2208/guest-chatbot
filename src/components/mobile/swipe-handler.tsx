@@ -89,7 +89,7 @@ interface SwipeIndicatorProps {
   side: 'left' | 'right';
 }
 
-function SwipeIndicator({ direction, icon, label, side }: SwipeIndicatorProps) {
+function SwipeIndicator({ icon, label, side }: SwipeIndicatorProps) {
   return (
     <motion.div
       initial={{ opacity: 0, x: side === 'left' ? -20 : 20 }}
