@@ -18,6 +18,7 @@ import { ChatSwipeHandler } from "@/components/mobile/swipe-handler";
  * 📨 Local message shape
  * ----------------------------------------------------------------*/
 interface Message {
+  id: string;
   sender: "bot" | "guest";
   text: string;
   /** Optional SLA/time shown under bot reply (e.g. "Within 15 min" or from backend) */
@@ -41,6 +42,13 @@ function getStorageKey(bookingId: string | number | null | undefined): string {
   return `${CHAT_STORAGE_KEY_PREFIX}-${bookingId ?? "default"}`;
 }
 
+function makeMessageId(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function loadChatFromStorage(key: string): { messages: Message[]; categoryIndex: number | null } {
   try {
     const raw = localStorage.getItem(key);
@@ -52,7 +60,12 @@ function loadChatFromStorage(key: string): { messages: Message[]; categoryIndex:
     const list = Array.isArray(messages) ? messages : [];
     const valid = list.filter(
       (m) => m && typeof m.sender === "string" && typeof m.text === "string" && (m.sender === "bot" || m.sender === "guest")
-    ).map((m) => ({ ...m, sla: typeof (m as Message).sla === "string" ? (m as Message).sla : undefined }));
+    ).map((m) => ({
+      id: typeof (m as Message).id === "string" ? (m as Message).id : makeMessageId(),
+      sender: (m as Message).sender,
+      text: (m as Message).text,
+      sla: typeof (m as Message).sla === "string" ? (m as Message).sla : undefined,
+    }));
     const idx = typeof categoryIndex === "number" && Number.isInteger(categoryIndex) ? categoryIndex : null;
     return { messages: valid, categoryIndex: idx };
   } catch {
@@ -84,6 +97,7 @@ export default function GuestChatBot() {
   const [isTyping, setIsTyping] = useState(false);
   const [restoreAttempted, setRestoreAttempted] = useState(false);
   const sentGreetingRef = useRef(false);
+  const botTimeoutsRef = useRef<number[]>([]);
 
   const booking = useRecoilValue(bookingAtom);
   const storageKey = getStorageKey(booking?.id ?? null);
@@ -97,16 +111,18 @@ export default function GuestChatBot() {
 
   const botSend = (text: string, delay = 500, sla?: string) => {
     setIsTyping(true);
-    setTimeout(() => {
+    const timeoutId = window.setTimeout(() => {
       push({ sender: "bot", text, sla });
       setIsTyping(false);
     }, delay);
+    botTimeoutsRef.current.push(timeoutId);
   };
 
   /** --------------------------------------------------------------
    * Utils
    * --------------------------------------------------------------*/
-  const push = (msg: Message) => setMessages((prev) => [...prev, msg]);
+  const push = (msg: Omit<Message, "id">) =>
+    setMessages((prev) => [...prev, { id: makeMessageId(), ...msg }]);
 
   const buildHomeReplies = (): QuickReply[] => {
     const featured = getFeaturedItems().map((item) => ({
@@ -214,6 +230,11 @@ export default function GuestChatBot() {
     push({ sender: "guest", text: item.label });
     setIsTyping(true);
 
+    // Yield so the user bubble paints and scroll runs before we block on the API
+    await new Promise<void>((r) =>
+      requestAnimationFrame(() => requestAnimationFrame(() => r()))
+    );
+
     const maybeReply = await item.action();
     const backendSla = maybeReply && typeof maybeReply === "object" && "slaMinutes" in maybeReply
       ? `Within ${(maybeReply as { slaMinutes: number }).slaMinutes} min`
@@ -263,6 +284,15 @@ export default function GuestChatBot() {
   useEffect(() => {
     saveChatToStorage(storageKey, messages, categoryIndex);
   }, [storageKey, messages, categoryIndex]);
+
+  useEffect(() => {
+    return () => {
+      for (const timeoutId of botTimeoutsRef.current) {
+        clearTimeout(timeoutId);
+      }
+      botTimeoutsRef.current = [];
+    };
+  }, []);
 
   // Initial greeting only after restore attempted and no messages (send once)
   useEffect(() => {

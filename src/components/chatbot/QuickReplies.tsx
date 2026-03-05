@@ -12,10 +12,10 @@ interface QuickRepliesProps {
 
 const QuickReplies: FC<QuickRepliesProps> = ({ replies }) => (
   <div className="flex flex-wrap justify-center gap-2 pt-3 pb-2">
-    {replies.map(({ label, onClick, icon }, idx) => (
+    {replies.map(({ label, onClick, icon }) => (
       <button
         type="button"
-        key={idx}
+        key={label}
         onClick={onClick}
         className="inline-flex items-center gap-2 rounded-xl border border-white/40 bg-white/70 px-4 py-3 text-sm font-medium text-slate-800 shadow-sm transition-all duration-200 hover:scale-[1.02] hover:border-white/60 hover:bg-white/90 hover:shadow active:scale-[0.98] dark:border-white/20 dark:bg-slate-800/70 dark:text-slate-100 dark:hover:bg-slate-800/90 touch-manipulation"
       >

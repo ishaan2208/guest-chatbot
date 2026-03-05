@@ -5,6 +5,7 @@ import QuickReplies from "./QuickReplies";
 import type { QuickReply } from "./QuickReplies";
 
 interface Message {
+  id: string;
   sender: "bot" | "guest";
   text: string;
   sla?: string;
@@ -24,14 +25,19 @@ const ChatWindow: FC<ChatWindowProps> = ({
   const endRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, quickReplies]);
+    if (messages.length === 0) return;
+    // Scroll so the latest message (and typing indicator if any) is in view
+    const id = requestAnimationFrame(() => {
+      endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [messages, quickReplies, isTyping]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-2 pt-6 pb-20">
-        {messages.map((msg, idx) => (
-          <Bubble key={idx} sender={msg.sender} text={msg.text} sla={msg.sla} />
+        {messages.map((msg) => (
+          <Bubble key={msg.id} sender={msg.sender} text={msg.text} sla={msg.sla} />
         ))}
         {isTyping && <Bubble sender="typing" text="" />}
         {quickReplies.length > 0 && !isTyping && (

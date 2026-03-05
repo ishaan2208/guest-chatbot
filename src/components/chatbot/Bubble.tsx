@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import ChatAvatar from "./Avatar";
 import TypingIndicator from "./TypingIndicator";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 
 export default function Bubble({
   sender,
@@ -13,24 +13,30 @@ export default function Bubble({
   sla?: string;
 }) {
   const isGuest = sender === "guest";
+  const prefersReducedMotion = useReducedMotion();
 
   // 👉 Handle typing as a dedicated branch (no tail, no text)
   if (sender === "typing") {
     return (
       <div className="flex w-full gap-2 items-center justify-start">
         <ChatAvatar sender="bot" />
-        <div className="max-w-[75%] rounded-2xl px-3 py-2 text-sm shadow-md dark:bg-slate-800 text-foreground">
+        <div className="max-w-[75%] rounded-2xl bg-white px-3 py-2 text-sm text-foreground shadow-md dark:bg-slate-800">
           <TypingIndicator />
         </div>
       </div>
     );
   }
+  // Guest bubbles appear instantly for clear feedback; bot bubbles animate in
+  const motionProps = prefersReducedMotion || isGuest
+    ? { initial: false as const, animate: { opacity: 1, y: 0 } }
+    : {
+        initial: { opacity: 0, y: 10 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.25 },
+      };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
+    <motion.div {...motionProps}>
       <div
         className={cn(
           "flex w-full gap-2 items-center",
