@@ -89,8 +89,8 @@ This document describes how the **Zenvana Guest Chatbot** app handles user exper
 
 ### 2.3 Layout Shell (ChatbotLayout)
 - **Always present on `/room/chatbot/*`:** Header, BackgroundFX, main content area (max-w-5xl, with top padding for fixed header).
-- **Desktop:** SidebarNav, SidebarToggle, CommandPalette, and a CommandPalette trigger near the content.
-- **Mobile:** BottomNav only (Home, History, Profile). No command palette in the UI.
+- **Desktop:** SidebarNav, SidebarToggle.
+- **Mobile:** BottomNav only (Home, History, Profile).
 - **Responsive breakpoint:** “Mobile” is determined by `useUIState().isMobile` (e.g. width < 768px). Screen size is tracked (sm/md/lg/xl/2xl).
 
 ---
@@ -158,7 +158,7 @@ This document describes how the **Zenvana Guest Chatbot** app handles user exper
 - **Reduced motion:** From state or `prefers-reduced-motion: reduce`; used to simplify or disable animations.
 - **Notifications:** List of { id, title, message, type, duration?, actions? }. Shown in NotificationToaster (top-right). Auto-dismiss after duration (0 = persistent). Offline shows “Connection Lost” until back online.
 - **Loading:** isLoading + loadingMessage for global loading feedback.
-- **Bottom sheet / Command palette / Sidebar:** Open state and active sheet or panel.
+- **Bottom sheet / Sidebar:** Open state and active sheet or panel.
 - **Device:** isMobile, screenSize, isOnline.
 - **Accessibility:** fontSize (sm/base/lg/xl applied to root), highContrast (class on root), keyboardNavigation, screenReader.
 - **Interactions:** lastInteraction, hapticEnabled, soundEnabled.

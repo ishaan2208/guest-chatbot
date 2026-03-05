@@ -21,7 +21,6 @@ interface UIState {
   
   // Layout and navigation
   sidebarOpen: boolean;
-  commandPaletteOpen: boolean;
   bottomSheetOpen: boolean;
   activeSheet: string | null;
   
@@ -56,9 +55,7 @@ interface UIState {
   setActualTheme: (theme: 'light' | 'dark') => void;
   toggleSidebar: () => void;
   setSidebarOpen: (open: boolean) => void;
-  openCommandPalette: () => void;
-  closeCommandPalette: () => void;
-  
+
   // Bottom sheet management
   openBottomSheet: (sheetId: string) => void;
   closeBottomSheet: () => void;
@@ -106,7 +103,6 @@ export const useUIState = create<UIState>((set, get) => ({
   actualTheme: 'light',
   reducedMotion: false,
   sidebarOpen: false,
-  commandPaletteOpen: false,
   bottomSheetOpen: false,
   activeSheet: null,
   isLoading: false,
@@ -159,15 +155,6 @@ export const useUIState = create<UIState>((set, get) => ({
 
   setSidebarOpen: (open) => {
     set({ sidebarOpen: open });
-  },
-
-  openCommandPalette: () => {
-    set({ commandPaletteOpen: true });
-    get().updateLastInteraction();
-  },
-
-  closeCommandPalette: () => {
-    set({ commandPaletteOpen: false });
   },
 
   openBottomSheet: (sheetId) => {
