@@ -1,5 +1,6 @@
 import type { FC } from "react";
 import { useEffect, useRef } from "react";
+import { useReducedMotion } from "framer-motion";
 import Bubble from "./Bubble";
 import QuickReplies from "./QuickReplies";
 import type { QuickReply } from "./QuickReplies";
@@ -23,15 +24,19 @@ const ChatWindow: FC<ChatWindowProps> = ({
   isTyping,
 }) => {
   const endRef = useRef<HTMLDivElement | null>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     if (messages.length === 0) return;
     // Scroll so the latest message (and typing indicator if any) is in view
     const id = requestAnimationFrame(() => {
-      endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      endRef.current?.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "end",
+      });
     });
     return () => cancelAnimationFrame(id);
-  }, [messages, quickReplies, isTyping]);
+  }, [messages, quickReplies, isTyping, prefersReducedMotion]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">

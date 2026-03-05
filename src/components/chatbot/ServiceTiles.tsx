@@ -27,7 +27,7 @@ const ServiceTiles: FC<ServiceTilesProps> = ({ items, onSelect }) => {
             type="button"
             key={`${item.type}-${idx}`}
             onClick={() => onSelect(item)}
-            className="flex flex-col items-start gap-1.5 rounded-xl border border-border bg-card/80 p-4 text-left shadow-sm transition-colors hover:bg-muted/50 active:scale-[0.99] touch-manipulation"
+            className="flex flex-col items-start gap-1.5 rounded-xl border border-border bg-card/80 p-4 text-left shadow-sm transition-[transform,background-color,box-shadow] duration-200 ease-out motion-safe:hover:scale-[1.01] hover:bg-muted/50 hover:shadow motion-safe:active:scale-[0.99] motion-reduce:transition-none touch-manipulation"
           >
             <span className="flex items-center gap-2 text-foreground [&_svg]:h-5 [&_svg]:w-5 shrink-0">
               {icon}

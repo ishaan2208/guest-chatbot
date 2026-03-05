@@ -18,6 +18,8 @@ import { Button } from '../ui/button';
 import { useConversation } from '../../stores/conversation';
 import { useGuestProfile } from '../../stores/guestProfile';
 import { useUIState } from '../../stores/ui';
+import { formatGuestName } from '../../lib/guestName';
+import { guestStorage } from '../../services/storage';
 
 interface NavItem {
   id: string;
@@ -45,6 +47,24 @@ export function SidebarNav({ className }: SidebarNavProps) {
   } = useConversation();
   
   const { isReturningGuest, requestHistory, guestName } = useGuestProfile();
+  const persistedProfile = React.useMemo(
+    () =>
+      (guestStorage.getProfile() as {
+        guestName?: string;
+        requestHistory?: Array<{ type: string; timestamp: number }>;
+        isReturningGuest?: boolean;
+      } | undefined) ?? {},
+    []
+  );
+  const resolvedRequestHistory =
+    requestHistory.length > 0
+      ? requestHistory
+      : Array.isArray(persistedProfile.requestHistory)
+        ? persistedProfile.requestHistory
+        : [];
+  const resolvedIsReturningGuest =
+    isReturningGuest || Boolean(persistedProfile.isReturningGuest) || resolvedRequestHistory.length > 0;
+  const guestDisplayName = formatGuestName(guestName ?? persistedProfile.guestName);
 
   const activeRequests = getActiveServiceCount();
   const notificationCount = notifications.length;
@@ -74,7 +94,7 @@ export function SidebarNav({ className }: SidebarNavProps) {
       onClick: () => {
         // Open service history
       },
-      badge: isReturningGuest && requestHistory.length > 0 ? requestHistory.length : undefined,
+      badge: resolvedIsReturningGuest && resolvedRequestHistory.length > 0 ? resolvedRequestHistory.length : undefined,
     },
     {
       id: 'profile',
@@ -155,18 +175,18 @@ export function SidebarNav({ className }: SidebarNavProps) {
         </div>
 
         {/* Guest info */}
-        {guestName && (
+        {guestDisplayName && (
           <div className="p-4 border-b border-border">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-full flex items-center justify-center">
                 <span className="text-primary-foreground font-medium">
-                  {guestName.charAt(0).toUpperCase()}
+                  {guestDisplayName.charAt(0).toUpperCase()}
                 </span>
               </div>
               <div>
-                <p className="font-medium text-foreground">Welcome back, {guestName}</p>
+                <p className="font-medium text-foreground">Welcome back, {guestDisplayName}</p>
                 <p className="text-xs text-muted-foreground">
-                  {isReturningGuest ? 'Returning Guest' : 'First Visit'}
+                  {resolvedIsReturningGuest ? 'Returning Guest' : 'First Visit'}
                 </p>
               </div>
             </div>

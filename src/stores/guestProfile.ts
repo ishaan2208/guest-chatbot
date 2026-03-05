@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { guestStorage } from '../services/storage';
+import { formatGuestName } from '@/lib/guestName';
 
 interface GuestProfile {
   // Basic guest info
@@ -29,6 +30,8 @@ interface GuestProfile {
     type: string;
     timestamp: number;
     completed: boolean;
+    status?: string;
+    dueAt?: number;
   }>;
 
   // Session data
@@ -41,7 +44,7 @@ interface GuestProfileState extends GuestProfile {
   // Actions
   updateProfile: (updates: Partial<GuestProfile>) => void;
   setPreference: <K extends keyof GuestProfile>(key: K, value: GuestProfile[K]) => void;
-  addServiceToHistory: (serviceType: string, completed: boolean) => void;
+  addServiceToHistory: (serviceType: string, completed: boolean, meta?: { status?: string; dueAt?: number }) => void;
   addToFavorites: (serviceType: string) => void;
   removeFromFavorites: (serviceType: string) => void;
   updateSession: () => void;
@@ -91,13 +94,16 @@ export const useGuestProfile = create<GuestProfileState>((set, get) => ({
     });
   },
 
-  addServiceToHistory: (serviceType, completed) => {
+  addServiceToHistory: (serviceType, completed, meta) => {
     set((state) => {
-      const newHistory = [
-        ...state.requestHistory,
-        { type: serviceType, timestamp: Date.now(), completed }
-      ].slice(-50); // Keep last 50 requests
-
+      const entry = {
+        type: serviceType,
+        timestamp: Date.now(),
+        completed,
+        ...(meta?.status != null && { status: meta.status }),
+        ...(meta?.dueAt != null && { dueAt: meta.dueAt }),
+      };
+      const newHistory = [...state.requestHistory, entry].slice(-50);
       const newState = { ...state, requestHistory: newHistory };
       guestStorage.setProfile(newState);
       return newState;
@@ -156,7 +162,7 @@ export const useGuestProfile = create<GuestProfileState>((set, get) => ({
     const state = get();
     const hour = new Date().getHours();
     const isReturning = state.isReturningGuest;
-    const guestName = state.guestName;
+    const guestName = formatGuestName(state.guestName);
 
     let timeGreeting = '';
     if (hour < 12) timeGreeting = 'Good morning';

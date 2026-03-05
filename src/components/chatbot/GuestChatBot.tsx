@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRecoilValue } from "recoil";
 import { Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 import { Card, CardContent } from "@/components/ui/card";
 import ChatWindow from "./ChatWindow";
@@ -9,7 +10,6 @@ import { useGuestServiceMenu } from "@/constants/guestService";
 import type { GuestServiceItem } from "@/constants/guestService";
 import type { QuickReply } from "./QuickReplies";
 import { bookingAtom } from "@/store/booking.recoil";
-import { Capitalize } from "@/lib/Capitalize";
 import { ITEM_ICON, CATEGORY_ICON, UI_ICON } from "@/constants/icons";
 import { useGuestProfile } from "@/stores/guestProfile";
 import { ChatSwipeHandler } from "@/components/mobile/swipe-handler";
@@ -90,6 +90,7 @@ function saveChatToStorage(
  * 🚀 GuestChatBot – root UI component
  * ----------------------------------------------------------------*/
 export default function GuestChatBot() {
+  const navigate = useNavigate();
   const guestServiceMenu = useGuestServiceMenu();
   const [messages, setMessages] = useState<Message[]>([]);
   const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
@@ -235,20 +236,34 @@ export default function GuestChatBot() {
       requestAnimationFrame(() => requestAnimationFrame(() => r()))
     );
 
-    const maybeReply = await item.action();
-    const backendSla = maybeReply && typeof maybeReply === "object" && "slaMinutes" in maybeReply
-      ? `Within ${(maybeReply as { slaMinutes: number }).slaMinutes} min`
-      : maybeReply && typeof maybeReply === "object" && "dueAt" in maybeReply
-        ? formatDueAt((maybeReply as { dueAt: string }).dueAt)
-        : undefined;
-    const sla = backendSla ?? (item.etaMinutes != null ? `Within ${item.etaMinutes} min` : undefined);
+    try {
+      const maybeReply = await item.action();
+      const backendSla = maybeReply && typeof maybeReply === "object" && "slaMinutes" in maybeReply
+        ? `Within ${(maybeReply as { slaMinutes: number }).slaMinutes} min`
+        : maybeReply && typeof maybeReply === "object" && "dueAt" in maybeReply
+          ? formatDueAt((maybeReply as { dueAt: string }).dueAt)
+          : undefined;
+      const sla = backendSla ?? (item.etaMinutes != null ? `Within ${item.etaMinutes} min` : undefined);
 
-    if (typeof maybeReply === "string") {
-      botSend(maybeReply, 500, sla);
-    } else if (item.reply) {
-      botSend(item.reply, 500, sla);
-    } else {
-      botSend("Thank you for your request! We'll process it shortly.", 500, sla);
+      if (typeof maybeReply === "string") {
+        botSend(maybeReply, 500, sla);
+      } else if (item.reply) {
+        botSend(item.reply, 500, sla);
+      } else {
+        botSend("Thank you for your request! We'll process it shortly.", 500, sla);
+      }
+    } catch (error) {
+      setIsTyping(false);
+      push({
+        sender: "bot",
+        text:
+          error instanceof Error && error.message
+            ? error.message
+            : "Session expired. Please sign in again.",
+      });
+      setQuickReplies([]);
+      setTimeout(() => navigate("/login", { replace: true }), 900);
+      return;
     }
 
     addServiceToHistory(item.type, true);
@@ -299,14 +314,12 @@ export default function GuestChatBot() {
     if (!restoreAttempted || messages.length > 0 || sentGreetingRef.current) return;
     sentGreetingRef.current = true;
     botSend(
-      `${getContextualGreeting()} ${Capitalize(
-        (booking?.guestName.toLowerCase() as string) || "Guest"
-      )}! I’m your Zenvana concierge. Quick actions below, or browse categories 👇`,
+      `${getContextualGreeting()} I’m your Zenvana concierge. Quick actions below, or browse categories 👇`,
       0
     );
     setQuickReplies(buildHomeReplies());
     // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional narrow deps; full deps would re-send greeting
-  }, [booking?.guestName, restoreAttempted]);
+  }, [restoreAttempted]);
 
   const onRefresh = () => {
     setQuickReplies(buildHomeReplies());

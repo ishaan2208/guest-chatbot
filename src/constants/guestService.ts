@@ -1,4 +1,4 @@
-import { Capitalize } from "@/lib/Capitalize";
+import { formatGuestName } from "@/lib/guestName";
 import { bookingAtom } from "@/store/booking.recoil";
 import { useRecoilValue } from "recoil";
 import { useUIState } from "@/stores/ui";
@@ -7,11 +7,10 @@ export function useGuestServiceMenu() {
   const booking = useRecoilValue(bookingAtom);
 
   // lightweight personalization
-  const firstName = Capitalize(
-    booking?.guestName?.split(" ")?.[0].toLowerCase() ||
-    booking?.guest?.name?.split(" ")?.[0].toLowerCase() ||
-    "Guest"
-  );
+  const firstName =
+    formatGuestName(booking?.guestName ?? booking?.guest?.name, {
+      useFirstName: true,
+    }) ?? "Guest";
   let roomNo =
     (typeof window !== "undefined" &&
       booking?.BookingRoom.find(
@@ -566,6 +565,7 @@ async function actionableAction(
     return result;
   } catch (e) {
     console.error(e);
+    throw e;
   }
 }
 

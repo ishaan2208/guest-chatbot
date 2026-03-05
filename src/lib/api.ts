@@ -1,4 +1,5 @@
 import axios from "@/lib/axios.config";
+import { assertActiveInhouseStay } from "@/lib/sessionGuard";
 
 // client: api.ts
 export async function createTicketFromItem(
@@ -8,8 +9,10 @@ export async function createTicketFromItem(
     bookingId?: number | null;
     roomId?: number | null;
     guestId?: number | null;
+    bookingRoomId?: number | string | null;
   }
 ) {
+  await assertActiveInhouseStay(ctx.bookingRoomId);
   const idempotencyKey = crypto.randomUUID();
   // Save the idempotency key in meta for later reference
   const res = await axios.post(

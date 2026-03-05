@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { Clock } from "lucide-react";
 import { useGuestProfile } from "@/stores/guestProfile";
 import { Card, CardContent } from "@/components/ui/card";
+import { guestStorage } from "@/services/storage";
 
 const SERVICE_LABELS: Record<string, string> = {
   EXTRA_TOWELS: "More towels",
@@ -33,6 +35,23 @@ const SERVICE_LABELS: Record<string, string> = {
 
 export default function ServiceHistoryPage() {
   const { requestHistory, isReturningGuest } = useGuestProfile();
+  const persistedProfile = useMemo(
+    () =>
+      (guestStorage.getProfile() as {
+        requestHistory?: Array<{ type: string; timestamp: number }>;
+        isReturningGuest?: boolean;
+      } | undefined) ?? {},
+    []
+  );
+
+  const resolvedRequestHistory =
+    requestHistory.length > 0
+      ? requestHistory
+      : Array.isArray(persistedProfile.requestHistory)
+        ? persistedProfile.requestHistory
+        : [];
+  const resolvedIsReturningGuest =
+    isReturningGuest || Boolean(persistedProfile.isReturningGuest) || resolvedRequestHistory.length > 0;
 
   return (
     <div className="mx-auto h-full w-full max-w-md pb-20 pt-2">
@@ -42,15 +61,15 @@ export default function ServiceHistoryPage() {
       </div>
       <Card className="rounded-2xl border border-white/30 bg-white/40 shadow-lg supports-backdrop-filter:backdrop-blur-2xl dark:border-white/10 dark:bg-slate-900/30">
         <CardContent className="p-4">
-          {requestHistory.length === 0 ? (
+          {resolvedRequestHistory.length === 0 ? (
             <p className="text-sm text-muted-foreground py-6 text-center">
-              {isReturningGuest
+              {resolvedIsReturningGuest
                 ? "No service requests yet this stay."
                 : "Your recent service requests will appear here."}
             </p>
           ) : (
             <ul className="space-y-3">
-              {[...requestHistory].reverse().map((req, idx) => (
+              {[...resolvedRequestHistory].reverse().map((req, idx) => (
                 <li
                   key={`${req.type}-${req.timestamp}-${idx}`}
                   className="flex justify-between items-center text-sm py-2 border-b border-border/50 last:border-0"

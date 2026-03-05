@@ -31,6 +31,7 @@ import { useCelebration } from "../components/animations/celebration";
 import { useGuestProfile } from "../stores/guestProfile";
 import { useUIState } from "../stores/ui";
 import { guestStorage } from "../services/storage";
+import { clearHardSignoutFlag, isHardSignoutActive } from "@/lib/sessionGuard";
 
 const formSchema = z.object({
   phoneNumber: z
@@ -72,6 +73,7 @@ export default function Login() {
   // Get stored credentials
   const storedSession = guestStorage.getSession() as { bookingId?: string | number; phoneNumber?: string } | undefined;
   const roomId = searchParams.get('roomId');
+  const hardSignoutActive = isHardSignoutActive();
 
   // Form setup
   const form = useForm<z.infer<typeof formSchema>>({
@@ -83,15 +85,25 @@ export default function Login() {
 
   // Handle QR code login on mount
   useEffect(() => {
+    if (hardSignoutActive && roomId) {
+      setQrState({
+        isProcessing: false,
+        isSuccess: false,
+        isError: true,
+        errorMessage: "You signed out recently. Please sign in manually to continue.",
+      });
+      navigate("/login", { replace: true });
+      return;
+    }
     if (roomId && !qrState.isProcessing) {
       handleQRLogin(roomId);
     }
-  }, [roomId]);
+  }, [roomId, hardSignoutActive, navigate]);
 
   // Check existing session
   useEffect(() => {
     loadProfile();
-    
+
     if (storedSession?.bookingId && storedSession?.phoneNumber && !roomId) {
       // Show welcome back animation
       celebrate('success', 'Welcome back!');
@@ -116,6 +128,7 @@ export default function Login() {
         checkInDate: data.BookingRoom?.[0]?.checkIn,
         checkOutDate: data.BookingRoom?.[0]?.checkOut,
       });
+      clearHardSignoutFlag();
 
       // Store room number ID for routing
       if (data.selectedRoomId || data.bookingRoomId) {
@@ -123,25 +136,25 @@ export default function Login() {
       }
 
       setQrState({ isProcessing: false, isSuccess: true, isError: false, errorMessage: "" });
-      
+
       // Celebration and navigation
       celebrate('confetti', 'Welcome to your room!');
       updateSession();
-      
+
       setTimeout(() => navigate("/room"), 2000);
 
     } catch (error: any) {
       console.error("QR login failed:", error);
-      
-      const errorMessage = error.response?.status === 404 
+
+      const errorMessage = error.response?.status === 404
         ? "No current stay found for this room. Please use your phone number to sign in."
         : "Something went wrong with QR sign-in. Please try again or use your phone number.";
 
-      setQrState({ 
-        isProcessing: false, 
-        isSuccess: false, 
-        isError: true, 
-        errorMessage 
+      setQrState({
+        isProcessing: false,
+        isSuccess: false,
+        isError: true,
+        errorMessage
       });
 
       addNotification({
@@ -163,7 +176,7 @@ export default function Login() {
       });
 
       const data = response.data.data;
-      
+
       // Store session data
       guestStorage.setSession({
         bookingId: data.id,
@@ -172,19 +185,20 @@ export default function Login() {
         checkInDate: data.BookingRoom?.[0]?.checkIn,
         checkOutDate: data.BookingRoom?.[0]?.checkOut,
       });
+      clearHardSignoutFlag();
 
       celebrate('success', 'Login successful!');
       updateSession();
-      
+
       setTimeout(() => navigate("/room"), 1000);
 
     } catch (error: any) {
       console.error("Login failed:", error);
-      
+
       const errorMessage = error.response?.status === 404
         ? "No active booking found for this phone number."
         : "Login failed. Please check your phone number and try again.";
-        
+
       form.setError("phoneNumber", {
         type: "manual",
         message: errorMessage,
@@ -206,7 +220,7 @@ export default function Login() {
     return (
       <PageTransition className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
         <div className="flex items-center justify-center min-h-screen p-4">
-          <motion.div 
+          <motion.div
             className="max-w-md w-full text-center space-y-6"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -217,10 +231,10 @@ export default function Login() {
               animate={{ y: [0, -10, 0] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
             >
-              <img 
-                className="h-24 w-24 mx-auto mb-6" 
-                src="/Zenvana logo.svg" 
-                alt="Zenvana Logo" 
+              <img
+                className="h-24 w-24 mx-auto mb-6"
+                src="/Zenvana logo.svg"
+                alt="Zenvana Logo"
               />
             </motion.div>
 
@@ -233,7 +247,7 @@ export default function Login() {
                 >
                   <QrCode className="w-full h-full text-primary" />
                 </motion.div>
-                
+
                 <div className="space-y-2">
                   <h2 className="text-xl font-semibold text-foreground">
                     Signing you in<LoadingDots />
@@ -255,9 +269,9 @@ export default function Login() {
                 >
                   <CheckCircle className="w-full h-full" />
                 </motion.div>
-                
+
                 <div className="space-y-2">
-                  <AnimatedText 
+                  <AnimatedText
                     text="Welcome to Zenvana!"
                     className="text-2xl font-bold text-foreground"
                   />
@@ -278,9 +292,9 @@ export default function Login() {
     <PageTransition className="min-h-screen">
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5 flex items-center justify-center p-4">
         <div className="max-w-md w-full space-y-8">
-          
+
           {/* Header Section */}
-          <motion.div 
+          <motion.div
             className="text-center space-y-6"
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -290,13 +304,13 @@ export default function Login() {
               whileHover={{ scale: 1.05, rotate: 5 }}
               transition={{ type: "spring", stiffness: 300, damping: 10 }}
             >
-              <img 
-                className="h-20 w-20 mx-auto" 
-                src="/Zenvana logo.svg" 
-                alt="Zenvana Logo" 
+              <img
+                className="h-20 w-20 mx-auto"
+                src="/Zenvana logo.svg"
+                alt="Zenvana Logo"
               />
             </motion.div>
-            
+
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">
                 <AnimatedText text="Welcome to Zenvana" />
@@ -335,7 +349,7 @@ export default function Login() {
             className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-6 shadow-xl"
           >
             <div className="space-y-6">
-              
+
               {/* QR Code Info */}
               {!roomId && (
                 <div className="text-center space-y-3">
@@ -385,7 +399,7 @@ export default function Login() {
 
                     <InteractiveButton
                       variant={isMobile ? 'touch' : 'default'}
-                      onClick={() => {}}
+                      onClick={() => { }}
                       disabled={submitDisabled}
                       className={`
                         w-full bg-primary text-primary-foreground 
@@ -457,7 +471,7 @@ export default function Login() {
             </div>
           </motion.div>
         </div>
-        
+
         {celebrations}
       </div>
     </PageTransition>

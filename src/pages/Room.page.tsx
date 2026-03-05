@@ -24,6 +24,7 @@ import { useCelebration } from "../components/animations/celebration";
 import { useGuestProfile } from "../stores/guestProfile";
 import { useUIState } from "../stores/ui";
 import { guestStorage } from "../services/storage";
+import { hardSignout } from "@/lib/sessionGuard";
 import { bookingAtom } from "@/store/booking.recoil";
 import type { Booking as BookingStoreType } from "@/types/booking.types";
 
@@ -72,6 +73,14 @@ const debugBooking = (...args: unknown[]) => {
 
 const getBookingCacheKey = (bookingId: number | string, phoneNumber: string) =>
   `${String(bookingId)}:${phoneNumber}`;
+
+const normalizeRoomStatus = (status: string | null | undefined) =>
+  (status ?? "").replace(/[^a-z]/gi, "").toUpperCase();
+
+const isRoomInhouse = (status: string | null | undefined) => {
+  const normalized = normalizeRoomStatus(status);
+  return normalized === "INHOUSE" || normalized === "CHECKEDIN" || normalized === "OCCUPIED";
+};
 
 const fetchBookingOnce = async (
   bookingId: number | string,
@@ -265,6 +274,17 @@ export default function RoomPage() {
 
       try {
         const data = await fetchBookingOnce(bookingId, phoneNumber);
+        const selectedRoomId = localStorage.getItem("roomNumberId");
+        const selectedRoom = selectedRoomId
+          ? data.BookingRoom.find((room) => String(room.id) === selectedRoomId)
+          : undefined;
+        if (selectedRoomId && (!selectedRoom || !isRoomInhouse(selectedRoom.status))) {
+          throw new Error("Your room assignment changed. Please sign in again.");
+        }
+        if (!selectedRoomId && !data.BookingRoom.some((room) => isRoomInhouse(room.status))) {
+          throw new Error("Your stay is no longer active. Please sign in again.");
+        }
+
         setBooking(data);
         setBookingStore(data as unknown as BookingStoreType);
 
@@ -286,8 +306,7 @@ export default function RoomPage() {
         setError(errorMessage);
 
         // Clear stored data and redirect
-        guestStorage.clearAll();
-        localStorage.removeItem("roomNumberId");
+        hardSignout();
         setBookingStore(null);
 
         addNotification({
