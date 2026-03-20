@@ -70,6 +70,7 @@ export default function Login() {
     errorMessage: "",
   });
   const qrLoginAttemptRef = useRef<string | null>(null);
+  const initEffectRanRef = useRef(false);
 
   // Get stored credentials
   const storedSession = guestStorage.getSession() as { bookingId?: string | number; phoneNumber?: string } | undefined;
@@ -90,9 +91,7 @@ export default function Login() {
     setQrState({ isProcessing: true, isSuccess: false, isError: false, errorMessage: "" });
 
     try {
-      const response = await axios.get(
-        `/chatbot/guest-by-booking-room?bookingRoomId=${bookingRoomIdParam}`
-      );
+      const response = await axios.get(`/chatbot/guest-by-room?bookingRoomId=${bookingRoomIdParam}`);
       const data = response.data.data;
 
       guestStorage.setSession({
@@ -272,6 +271,9 @@ export default function Login() {
 
   // Check existing session
   useEffect(() => {
+    if (initEffectRanRef.current) return;
+    initEffectRanRef.current = true;
+
     loadProfile();
 
     if (storedSession?.bookingId && storedSession?.phoneNumber && !hasQrParam) {
