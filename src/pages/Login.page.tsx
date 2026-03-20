@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -69,10 +69,13 @@ export default function Login() {
     isError: false,
     errorMessage: "",
   });
+  const qrLoginAttemptRef = useRef<string | null>(null);
 
   // Get stored credentials
   const storedSession = guestStorage.getSession() as { bookingId?: string | number; phoneNumber?: string } | undefined;
+  const bookingRoomId = searchParams.get('bookingRoomId');
   const roomId = searchParams.get('roomId');
+  const hasQrParam = Boolean(bookingRoomId || roomId);
   const hardSignoutActive = isHardSignoutActive();
 
   // Form setup
@@ -83,40 +86,94 @@ export default function Login() {
     },
   });
 
-  // Handle QR code login on mount
-  useEffect(() => {
-    if (hardSignoutActive && roomId) {
+  const handleBookingRoomLogin = useCallback(async (bookingRoomIdParam: string, fallbackRoomId?: string | null) => {
+    setQrState({ isProcessing: true, isSuccess: false, isError: false, errorMessage: "" });
+
+    try {
+      const response = await axios.get(
+        `/chatbot/guest-by-booking-room?bookingRoomId=${bookingRoomIdParam}`
+      );
+      const data = response.data.data;
+
+      guestStorage.setSession({
+        bookingId: data.id,
+        phoneNumber: data.guestPhoneNumber,
+        roomNumber: data.roomNumber,
+        guestName: data.guestName,
+        checkInDate: data.BookingRoom?.[0]?.checkIn,
+        checkOutDate: data.BookingRoom?.[0]?.checkOut,
+      });
+      clearHardSignoutFlag();
+
+      if (data.selectedRoomId || data.bookingRoomId) {
+        localStorage.setItem("roomNumberId", String(data.selectedRoomId || data.bookingRoomId));
+      }
+
+      setQrState({ isProcessing: false, isSuccess: true, isError: false, errorMessage: "" });
+      celebrate('confetti', 'Welcome to your room!');
+      updateSession();
+      setTimeout(() => navigate("/room"), 2000);
+    } catch (error: any) {
+      console.error("Booking room login failed:", error);
+
+      if (fallbackRoomId) {
+        try {
+          const fallbackResponse = await axios.get(`/chatbot/guest-by-room?roomId=${fallbackRoomId}`);
+          const fallbackData = fallbackResponse.data.data;
+
+          guestStorage.setSession({
+            bookingId: fallbackData.id,
+            phoneNumber: fallbackData.guestPhoneNumber,
+            roomNumber: fallbackData.roomNumber,
+            guestName: fallbackData.guestName,
+            checkInDate: fallbackData.BookingRoom?.[0]?.checkIn,
+            checkOutDate: fallbackData.BookingRoom?.[0]?.checkOut,
+          });
+          clearHardSignoutFlag();
+
+          if (fallbackData.selectedRoomId || fallbackData.bookingRoomId) {
+            localStorage.setItem(
+              "roomNumberId",
+              String(fallbackData.selectedRoomId || fallbackData.bookingRoomId)
+            );
+          }
+
+          setQrState({ isProcessing: false, isSuccess: true, isError: false, errorMessage: "" });
+          celebrate('confetti', 'Welcome to your room!');
+          updateSession();
+          setTimeout(() => navigate("/room"), 2000);
+          return;
+        } catch (fallbackError) {
+          console.error("Fallback room login failed:", fallbackError);
+        }
+      }
+
+      const errorMessage = error.response?.status === 404
+        ? "No current stay found for this room. Please use your phone number to sign in."
+        : "Something went wrong with QR sign-in. Please try again or use your phone number.";
+
       setQrState({
         isProcessing: false,
         isSuccess: false,
         isError: true,
-        errorMessage: "You signed out recently. Please sign in manually to continue.",
+        errorMessage
       });
-      navigate("/login", { replace: true });
-      return;
-    }
-    if (roomId && !qrState.isProcessing) {
-      handleQRLogin(roomId);
-    }
-  }, [roomId, hardSignoutActive, navigate]);
 
-  // Check existing session
-  useEffect(() => {
-    loadProfile();
-
-    if (storedSession?.bookingId && storedSession?.phoneNumber && !roomId) {
-      // Show welcome back animation
-      celebrate('success', 'Welcome back!');
-      setTimeout(() => navigate("/room"), 1000);
+      addNotification({
+        title: "QR Sign-in Failed",
+        message: errorMessage,
+        type: "warning",
+        duration: 8000,
+      });
     }
-  }, []);
+  }, [addNotification, celebrate, navigate, updateSession]);
 
   // QR code login handler
-  async function handleQRLogin(roomId: string) {
+  const handleQRLogin = useCallback(async (roomIdParam: string) => {
     setQrState({ isProcessing: true, isSuccess: false, isError: false, errorMessage: "" });
 
     try {
-      const response = await axios.get(`/chatbot/guest-by-room?roomId=${roomId}`);
+      const response = await axios.get(`/chatbot/guest-by-room?roomId=${roomIdParam}`);
       const data = response.data.data;
 
       // Store session data
@@ -164,7 +221,71 @@ export default function Login() {
         duration: 8000,
       });
     }
-  }
+  }, [addNotification, celebrate, navigate, updateSession]);
+
+  // Handle QR code login on mount
+  useEffect(() => {
+    if (hardSignoutActive && hasQrParam) {
+      setQrState({
+        isProcessing: false,
+        isSuccess: false,
+        isError: true,
+        errorMessage: "You signed out recently. Please sign in manually to continue.",
+      });
+      navigate("/login", { replace: true });
+      return;
+    }
+
+    const loginKey = bookingRoomId
+      ? `bookingRoomId:${bookingRoomId}`
+      : roomId
+        ? `roomId:${roomId}`
+        : null;
+
+    if (!loginKey) {
+      qrLoginAttemptRef.current = null;
+      return;
+    }
+
+    if (qrLoginAttemptRef.current === loginKey) {
+      return;
+    }
+
+    qrLoginAttemptRef.current = loginKey;
+
+    if (bookingRoomId) {
+      handleBookingRoomLogin(bookingRoomId, roomId);
+      return;
+    }
+    if (roomId) {
+      handleQRLogin(roomId);
+    }
+  }, [
+    bookingRoomId,
+    roomId,
+    hasQrParam,
+    hardSignoutActive,
+    navigate,
+    handleBookingRoomLogin,
+    handleQRLogin,
+  ]);
+
+  // Check existing session
+  useEffect(() => {
+    loadProfile();
+
+    if (storedSession?.bookingId && storedSession?.phoneNumber && !hasQrParam) {
+      celebrate('success', 'Welcome back!');
+      setTimeout(() => navigate("/room"), 1000);
+    }
+  }, [
+    celebrate,
+    hasQrParam,
+    loadProfile,
+    navigate,
+    storedSession?.bookingId,
+    storedSession?.phoneNumber,
+  ]);
 
   // Phone number form submit
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -216,7 +337,7 @@ export default function Login() {
   }
 
   // Render QR processing state
-  if (roomId && (qrState.isProcessing || qrState.isSuccess)) {
+  if (hasQrParam && (qrState.isProcessing || qrState.isSuccess)) {
     return (
       <PageTransition className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/5">
         <div className="flex items-center justify-center min-h-screen p-4">
@@ -351,7 +472,7 @@ export default function Login() {
             <div className="space-y-6">
 
               {/* QR Code Info */}
-              {!roomId && (
+              {!hasQrParam && (
                 <div className="text-center space-y-3">
                   <div className="inline-flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-full px-3 py-1">
                     <QrCode className="w-4 h-4" />
@@ -432,7 +553,7 @@ export default function Login() {
                 <p className="text-xs text-muted-foreground">
                   Enter the phone number used for your booking
                 </p>
-                {!roomId && (
+                {!hasQrParam && (
                   <p className="text-xs text-muted-foreground mt-2">
                     Or scan the QR code in your room for instant access
                   </p>
