@@ -1,9 +1,3 @@
 {
-  "redirects": [
-    {
-      "source": "/:path*",
-      "destination": "https://www.zenvanahotels.com/guest/:path*",
-      "permanent": true
-    }
-  ]
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
 }

@@ -27,12 +27,15 @@ import { guestStorage } from "../services/storage";
 import { hardSignout } from "@/lib/sessionGuard";
 import { bookingAtom } from "@/store/booking.recoil";
 import type { Booking as BookingStoreType } from "@/types/booking.types";
+import { stayCheckIn, stayCheckOut } from "@/lib/booking-room-dates";
 
 interface BookingRoom {
   id: number;
   roomNumber: string;
-  checkIn: string;
-  checkOut: string;
+  checkInDate: string;
+  checkOutDate: string;
+  checkIn?: string | null;
+  checkOut?: string | null;
   tariff: number;
   occupancy: number;
   children: number;
@@ -345,8 +348,8 @@ export default function RoomPage() {
   const getStayDuration = () => {
     if (!booking?.BookingRoom[0]) return null;
 
-    const checkIn = new Date(booking.BookingRoom[0].checkIn);
-    const checkOut = new Date(booking.BookingRoom[0].checkOut);
+    const checkIn = new Date(stayCheckIn(booking.BookingRoom[0]));
+    const checkOut = new Date(stayCheckOut(booking.BookingRoom[0]));
     const nights = Math.ceil((checkOut.getTime() - checkIn.getTime()) / (1000 * 60 * 60 * 24));
 
     return nights;
@@ -565,8 +568,8 @@ export default function RoomPage() {
 
                       {/* Check-in/out dates */}
                       <div className="flex justify-between text-xs text-muted-foreground mt-3">
-                        <span>Check-in: {new Date(room.checkIn).toLocaleDateString()}</span>
-                        <span>Check-out: {new Date(room.checkOut).toLocaleDateString()}</span>
+                        <span>Check-in: {new Date(stayCheckIn(room)).toLocaleDateString()}</span>
+                        <span>Check-out: {new Date(stayCheckOut(room)).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </InteractiveCard>

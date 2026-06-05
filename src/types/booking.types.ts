@@ -33,8 +33,12 @@ export type Guest = {
 
 export type BookingRoom = {
   bookingId: number;
-  checkIn: string;
-  checkOut: string;
+  checkInDate: string;
+  checkOutDate: string;
+  /** @deprecated Use checkInDate */
+  checkIn?: string | null;
+  /** @deprecated Use checkOutDate */
+  checkOut?: string | null;
   checkedInAt: null | string;
   checkedOutAt: null | string;
   createdAt: string;

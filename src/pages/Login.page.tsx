@@ -23,6 +23,7 @@ import {
   FormLabel,
   FormMessage,
 } from "../components/ui/form";
+import { stayCheckIn, stayCheckOut } from "@/lib/booking-room-dates";
 import { Input } from "../components/ui/input";
 import axios from "../lib/axios.config";
 import { PageTransition } from "../components/animations/page-transitions";
@@ -99,8 +100,8 @@ export default function Login() {
         phoneNumber: data.guestPhoneNumber,
         roomNumber: data.roomNumber,
         guestName: data.guestName,
-        checkInDate: data.BookingRoom?.[0]?.checkIn,
-        checkOutDate: data.BookingRoom?.[0]?.checkOut,
+        checkInDate: String(stayCheckIn(data.BookingRoom?.[0]) || ""),
+        checkOutDate: String(stayCheckOut(data.BookingRoom?.[0]) || ""),
       });
       clearHardSignoutFlag();
 
@@ -125,8 +126,8 @@ export default function Login() {
             phoneNumber: fallbackData.guestPhoneNumber,
             roomNumber: fallbackData.roomNumber,
             guestName: fallbackData.guestName,
-            checkInDate: fallbackData.BookingRoom?.[0]?.checkIn,
-            checkOutDate: fallbackData.BookingRoom?.[0]?.checkOut,
+            checkInDate: String(stayCheckIn(fallbackData.BookingRoom?.[0]) || ""),
+            checkOutDate: String(stayCheckOut(fallbackData.BookingRoom?.[0]) || ""),
           });
           clearHardSignoutFlag();
 
@@ -181,8 +182,8 @@ export default function Login() {
         phoneNumber: data.guestPhoneNumber,
         roomNumber: data.roomNumber,
         guestName: data.guestName,
-        checkInDate: data.BookingRoom?.[0]?.checkIn,
-        checkOutDate: data.BookingRoom?.[0]?.checkOut,
+        checkInDate: String(stayCheckIn(data.BookingRoom?.[0]) || ""),
+        checkOutDate: String(stayCheckOut(data.BookingRoom?.[0]) || ""),
       });
       clearHardSignoutFlag();
 
@@ -305,8 +306,8 @@ export default function Login() {
         bookingId: data.id,
         phoneNumber: values.phoneNumber,
         guestName: data.guestName,
-        checkInDate: data.BookingRoom?.[0]?.checkIn,
-        checkOutDate: data.BookingRoom?.[0]?.checkOut,
+        checkInDate: String(stayCheckIn(data.BookingRoom?.[0]) || ""),
+        checkOutDate: String(stayCheckOut(data.BookingRoom?.[0]) || ""),
       });
       clearHardSignoutFlag();
 
