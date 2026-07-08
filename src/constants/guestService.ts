@@ -3,6 +3,9 @@ import { bookingAtom } from "@/store/booking.recoil";
 import { useRecoilValue } from "recoil";
 import { useUIState } from "@/stores/ui";
 
+const FEASTA_URL = "https://feasta.stayzenvana.com";
+const openFeasta = (_details?: string) => window.open(FEASTA_URL, "_blank");
+
 export function useGuestServiceMenu() {
   const booking = useRecoilValue(bookingAtom);
 
@@ -35,11 +38,12 @@ export function useGuestServiceMenu() {
           featured: true,
           isChargeable: false,
           reply: `📶 Hey ${firstName}, Wi-Fi pass: ${wifiPass}`,
+          // The credentials card is shown in the chat; also log a ticket so the
+          // front desk knows the guest needed Wi-Fi help (best-effort).
           action: (_details?: string) => {
-            console.log();
-            console.log("g", localStorage.getItem("roomNumberId"));
+            notifyTicket(bookingRoomId, booking as Booking, "WIFI_PASSWORD");
             return null;
-          }, // reply handles content
+          },
         },
         {
           type: "EXTRA_TOWELS",
@@ -53,23 +57,15 @@ export function useGuestServiceMenu() {
           isChargeable: false,
           reply: `Certainly. Fresh towels have been requested for ${roomNo}. They should arrive shortly. Would you also like water bottles?`,
           action: async () => {
-            setTimeout(() => {
-              console.log("Requesting extra towels for:", roomNo);
-            }, 5000);
-            const action = await actionableAction(
+            const res = await actionableAction(
               bookingRoomId,
               booking as Booking,
               "TOWELS"
             );
-            console.log(
-              "Actionable action for towels:",
-              localStorage.getItem("roomNumberId")
-            );
-            if (action.existed) {
-              return "Certainly. We already have a request for towels to " + roomNo + ". They should arrive shortly.";
-            } else {
-              return;
+            if (res && typeof res === "object" && "existed" in res) {
+              return `We already have a towels request in for ${roomNo} — it's on the way.`;
             }
+            return;
           },
         },
         {
@@ -319,8 +315,11 @@ export function useGuestServiceMenu() {
           kind: "REDIRECT",
           featured: true,
           isChargeable: false,
-          reply: "Certainly. Opening the menu.",
-          action: (_details?: string) => window.open("https://order.zenvana.in", "_blank"),
+          reply: "Certainly. Opening Feasta.",
+          action: (_details?: string) => {
+            notifyTicket(bookingRoomId, booking as Booking, "ORDER_FOOD");
+            openFeasta();
+          },
         },
         {
           type: "FOOD_CLEARANCE",
@@ -339,36 +338,38 @@ export function useGuestServiceMenu() {
         {
           type: "KIDS_MEAL",
           label: "Kids meal",
-          kind: "FUNCTION",
+          kind: "REDIRECT",
           featured: false,
           isChargeable: false,
-          reply: "Certainly. Kids meal has been noted. We'll arrange it shortly.",
-          action: (_details?: string) =>
-            actionableAction(bookingRoomId, booking as Booking, "KIDS_MEAL"),
+          reply: "Certainly — I've noted a kids meal for the kitchen. Opening Feasta to order.",
+          action: (_details?: string) => {
+            notifyTicket(bookingRoomId, booking as Booking, "KIDS_MEAL");
+            openFeasta();
+          },
         },
         {
           type: "JAIN_MEAL",
           label: "Jain / custom meal",
-          kind: "FUNCTION",
+          kind: "REDIRECT",
           featured: false,
           isChargeable: false,
-          reply: "Certainly. Jain or custom meal has been noted. We'll arrange it shortly.",
-          action: (_details?: string) =>
-            actionableAction(bookingRoomId, booking as Booking, "JAIN_MEAL"),
+          reply: "Certainly — I've noted your Jain/custom meal for the kitchen. Opening Feasta to order.",
+          action: (_details?: string) => {
+            notifyTicket(bookingRoomId, booking as Booking, "JAIN_MEAL");
+            openFeasta();
+          },
         },
         {
           type: "TABLE_BOOKING",
           label: "Book a table",
-          kind: "FUNCTION",
+          kind: "REDIRECT",
           featured: false,
           isChargeable: false,
-          reply: "📅 Certainly. We've noted your table booking request. We'll confirm shortly.",
-          action: (_details?: string) =>
-            actionableAction(
-              bookingRoomId,
-              booking as Booking,
-              "TABLE_BOOKING"
-            ),
+          reply: "Certainly — I've let the restaurant know. Opening Feasta to pick a time.",
+          action: (_details?: string) => {
+            notifyTicket(bookingRoomId, booking as Booking, "TABLE_BOOKING");
+            openFeasta();
+          },
         },
       ],
     },
@@ -386,10 +387,11 @@ export function useGuestServiceMenu() {
           featured: true,
           isChargeable: false,
           reply: "Certainly. Connecting you to reception.",
+          // The tap-to-call contact card is shown in the chat; we log a ticket
+          // instead of auto-dialing, so the front desk has a record and the
+          // background POST isn't interrupted by navigation.
           action: (_details?: string) => {
-            const phoneNumber = booking?.property?.receptionNo || "100";
-
-            window.open(`tel:${phoneNumber}`, "_self");
+            notifyTicket(bookingRoomId, booking as Booking, "CALL_RECEPTION");
           },
         },
         {
@@ -399,14 +401,16 @@ export function useGuestServiceMenu() {
           featured: false,
           isChargeable: false,
           reply: "🚨 Emergency: 100 (hotel protocol applies).",
+          // Surface the urgent contact card + a toast, and log a ticket so the
+          // property is alerted (best-effort — never blocks the alert).
           action: (_details?: string) => {
+            notifyTicket(bookingRoomId, booking as Booking, "EMERGENCY_NUMBER");
             useUIState.getState().addNotification({
               title: "Emergency",
               message: "Dial 100 for emergency. Hotel protocol applies.",
               type: "warning",
               duration: 8000,
             });
-            return "🚨 Emergency: 100 (hotel protocol applies). Please call if you need immediate help.";
           },
         },
         {
@@ -435,8 +439,11 @@ export function useGuestServiceMenu() {
           kind: "REDIRECT",
           featured: false,
           isChargeable: false,
-          reply: "🚕 Opening taxi booking…",
-          action: (_details?: string) => window.open("https://taxi.example.com", "_blank"),
+          reply: "🚕 Opening taxi booking — I've let reception know as well.",
+          action: (_details?: string) => {
+            notifyTicket(bookingRoomId, booking as Booking, "BOOK_TAXI");
+            window.open("https://taxi.example.com", "_blank");
+          },
         },
       ],
     },
@@ -565,12 +572,31 @@ async function actionableAction(
       { type, isChargeable: isPaid, details },
       ctx
     );
-    console.log("Ticket:", result);
     return result;
   } catch (e) {
     console.error(e);
     throw e;
   }
+}
+
+/**
+ * Fire-and-forget ticket for items whose main job is a client-side side effect
+ * (open Feasta, show the Wi-Fi card, dial reception, book a taxi). The property
+ * still gets a ticket, but a transient POST error must never block the redirect
+ * or bounce the guest to the login screen — so failures are swallowed (and
+ * logged) here instead of reaching handleItem's sign-out catch. The in-house
+ * guard and idempotency inside createTicketFromItem still apply.
+ */
+function notifyTicket(
+  bookingRoomId: string,
+  booking: Booking,
+  type: string,
+  isPaid = false,
+  details?: string
+) {
+  void actionableAction(bookingRoomId, booking, type, isPaid, details).catch(
+    (e) => console.warn(`[chatbot] background ticket failed for ${type}`, e)
+  );
 }
 
 // function actionableAction(bookingRoomId,booking as Booking,type: string, isPaid: boolean = false) {

@@ -43,9 +43,7 @@ const MAINTENANCE_TYPES = new Set([
   "TV_NOT_WORKING", "FLUSH_NOT_WORKING", "AC_NOT_WORKING", "LIGHT_ISSUE",
   "GEYSER_ISSUE", "SOCKET_ISSUE", "FRIDGE_ISSUE", "FAN_ISSUE",
 ]);
-const ROOM_SERVICE_TYPES = new Set([
-  "FOOD_CLEARANCE", "KIDS_MEAL", "JAIN_MEAL", "TABLE_BOOKING",
-]);
+const ROOM_SERVICE_TYPES = new Set(["FOOD_CLEARANCE"]);
 const FRONT_DESK_TYPES = new Set(["CHECKOUT_REQUEST", "LOST_KEYCARD"]);
 
 function deriveHandledBy(item: GuestServiceItem): string {
