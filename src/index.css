@@ -1,26 +1,25 @@
+/* Zenvana Guest Concierge — design tokens & foundations.
+   Brand anchors (shared with zenvana web): midnight #001F3F, praxeti #F6F7ED,
+   spring #DBE64C, book-green #00804C. See DESIGN.md. */
+
+@import "@fontsource-variable/plus-jakarta-sans";
+@import "@fontsource/fraunces/400.css";
+@import "@fontsource/fraunces/600.css";
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
-
 @theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
+  --font-sans: "Plus Jakarta Sans Variable", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+
+  --radius-sm: calc(var(--radius) - 6px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -35,127 +34,327 @@
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
   --color-destructive: var(--destructive);
+  --color-gold: var(--gold);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
+
+  --shadow-bubble: inset 0 1px 0 0 oklch(1 0 0 / 0.7), 0 1px 2px rgb(0 31 63 / 0.06), 0 8px 20px -12px rgb(0 31 63 / 0.2);
+  --shadow-card: inset 0 1px 0 0 oklch(1 0 0 / 0.7), 0 1px 2px rgb(0 31 63 / 0.05), 0 14px 32px -16px rgb(0 31 63 / 0.22);
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.141 0.005 285.823);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.141 0.005 285.823);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.141 0.005 285.823);
-  --primary: oklch(0.606 0.25 292.717);
-  --primary-foreground: oklch(0.969 0.016 293.756);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.21 0.006 285.885);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.606 0.25 292.717);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.141 0.005 285.823);
-  --sidebar-primary: oklch(0.606 0.25 292.717);
-  --sidebar-primary-foreground: oklch(0.969 0.016 293.756);
-  --sidebar-accent: oklch(0.967 0.001 286.375);
-  --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-  --sidebar-border: oklch(0.92 0.004 286.32);
-  --sidebar-ring: oklch(0.606 0.25 292.717);
+  --radius: 1rem;
+
+  /* Praxeti canvas, midnight ink */
+  --background: oklch(0.964 0.015 111.3);
+  --foreground: oklch(0.2381 0.0713 252);
+  --card: oklch(0.999 0.002 110);
+  --card-foreground: oklch(0.2381 0.0713 252);
+  --popover: oklch(0.998 0.003 110);
+  --popover-foreground: oklch(0.2381 0.0713 252);
+  --primary: oklch(0.2381 0.0713 252);
+  --primary-foreground: oklch(0.9726 0.0132 111.3);
+  --secondary: oklch(0.938 0.02 110);
+  --secondary-foreground: oklch(0.2381 0.0713 252);
+  --muted: oklch(0.945 0.016 110);
+  --muted-foreground: oklch(0.45 0.045 255);
+  --accent: oklch(0.8893 0.1718 113.4);
+  --accent-foreground: oklch(0.2381 0.0713 252);
+  --success: oklch(0.5278 0.1262 156.7);
+  --destructive: oklch(0.5683 0.135 36.2);
+  --gold: oklch(0.7439 0.1043 87.5);
+  --border: oklch(0.2381 0.0713 252 / 10%);
+  --input: oklch(0.2381 0.0713 252 / 14%);
+  --ring: oklch(0.414 0.1268 260.3);
+
+  /* Base canvas wash — a soft, always-painted floor under the ambient layers */
+  --canvas-wash:
+    radial-gradient(52rem 30rem at 88% -14%, oklch(0.414 0.1268 260.3 / 6%), transparent 68%),
+    radial-gradient(38rem 26rem at -16% 110%, oklch(0.8893 0.1718 113.4 / 10%), transparent 66%);
+
+  /* Ambient blob tints (soft radial glows — softness baked into the stops,
+     so they read as blur without a paint-heavy filter) */
+  --blob-1: oklch(0.8893 0.1718 113.4 / 34%); /* spring */
+  --blob-2: oklch(0.414 0.1268 260.3 / 26%);  /* nuit blue */
+  --blob-3: oklch(0.7439 0.1043 87.5 / 30%);  /* gold */
+  --beam: oklch(0.2381 0.0713 252 / 7%);
+  --grain-opacity: 0.06;
 }
 
 .dark {
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.541 0.281 293.009);
-  --primary-foreground: oklch(0.969 0.016 293.756);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.541 0.281 293.009);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.21 0.006 285.885);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.541 0.281 293.009);
-  --sidebar-primary-foreground: oklch(0.969 0.016 293.756);
-  --sidebar-accent: oklch(0.274 0.006 286.033);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.541 0.281 293.009);
+  /* Warm ink canvas, praxeti text, spring accent */
+  --background: oklch(0.153 0.03 264);
+  --foreground: oklch(0.955 0.011 111);
+  --card: oklch(0.248 0.032 260);
+  --card-foreground: oklch(0.955 0.011 111);
+  --popover: oklch(0.248 0.032 260);
+  --popover-foreground: oklch(0.955 0.011 111);
+  --primary: oklch(0.8893 0.1718 113.4);
+  --primary-foreground: oklch(0.17 0.028 262);
+  --secondary: oklch(0.305 0.032 260);
+  --secondary-foreground: oklch(0.955 0.011 111);
+  --muted: oklch(0.255 0.03 260);
+  --muted-foreground: oklch(0.72 0.02 255);
+  --accent: oklch(0.8893 0.1718 113.4);
+  --accent-foreground: oklch(0.17 0.028 262);
+  --success: oklch(0.72 0.14 157);
+  --destructive: oklch(0.68 0.14 36);
+  --gold: oklch(0.79 0.11 86);
+  --border: oklch(0.955 0.011 111 / 10%);
+  --input: oklch(0.955 0.011 111 / 14%);
+  --ring: oklch(0.8893 0.1718 113.4 / 70%);
+
+  --shadow-bubble: inset 0 1px 0 0 rgb(255 255 255 / 0.05), 0 1px 2px rgb(0 0 0 / 0.32), 0 10px 24px -12px rgb(0 0 0 / 0.62);
+  --shadow-card: inset 0 1px 0 0 rgb(255 255 255 / 0.06), 0 1px 2px rgb(0 0 0 / 0.35), 0 16px 34px -16px rgb(0 0 0 / 0.66);
+
+  --canvas-wash:
+    radial-gradient(52rem 30rem at 88% -14%, oklch(0.414 0.1268 260.3 / 26%), transparent 68%),
+    radial-gradient(38rem 26rem at -16% 110%, oklch(0.8893 0.1718 113.4 / 8%), transparent 66%);
+
+  --blob-1: oklch(0.8893 0.1718 113.4 / 16%);
+  --blob-2: oklch(0.55 0.15 262 / 32%);
+  --blob-3: oklch(0.79 0.11 86 / 16%);
+  --beam: oklch(0.955 0.011 111 / 5%);
+  --grain-opacity: 0.06;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  button {
+    cursor: pointer;
+  }
+  ::selection {
+    background: oklch(0.8893 0.1718 113.4 / 45%);
+    color: oklch(0.2381 0.0713 252);
   }
 }
 
-/* Typing dots animation */
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility font-display {
+  font-family: var(--font-display);
+}
+
+/* Chat wallpaper — "tossed lotus garden": a 320px composition of seven hand-drawn
+   objects (rose-window medallion, curled paisley ×2, lotus sprig, crescent moon,
+   quatrefoil bloom, lotus bud, seed trio, sparkles) at varied rotations/scales so
+   the repeat never reads as a grid. Single-color mask → recolors with the theme
+   (ink on praxeti in light; gold thread on ink in dark — see the .dark overrides
+   below). Fixed layer, z -9, above the ambient glow (-10), below content; never
+   repaints on scroll. Pair with .chat-pattern-lg (rendered as an earlier sibling)
+   — the same tile at 1.75x, half-offset, fainter — for a layered-wallpaper depth
+   effect. Do not edit the SVG: edge sparkles are mirrored across tile boundaries
+   for a seamless wrap. */
+@utility chat-pattern {
+  position: fixed;
+  inset: 0;
+  z-index: -9;
+  pointer-events: none;
+  background-color: var(--foreground);
+  opacity: 0.06;
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+  -webkit-mask-size: 320px 320px;
+  mask-size: 320px 320px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cdefs%3E%3Cpath id='pt' d='M0 -8C4.5 -14 4.5 -24 0 -32C-4.5 -24 -4.5 -14 0 -8Z' fill='none' stroke='%23fff' stroke-width='0.75'/%3E%3Cg id='med'%3E%3Cuse href='%23pt'/%3E%3Cuse href='%23pt' transform='rotate(45)'/%3E%3Cuse href='%23pt' transform='rotate(90)'/%3E%3Cuse href='%23pt' transform='rotate(135)'/%3E%3Cuse href='%23pt' transform='rotate(180)'/%3E%3Cuse href='%23pt' transform='rotate(225)'/%3E%3Cuse href='%23pt' transform='rotate(270)'/%3E%3Cuse href='%23pt' transform='rotate(315)'/%3E%3Ccircle r='6' fill='none' stroke='%23fff' stroke-width='0.75'/%3E%3Ccircle r='12.5' fill='none' stroke='%23fff' stroke-width='0.6' stroke-dasharray='1 4'/%3E%3Ccircle r='1.7' fill='%23fff'/%3E%3Cg fill='%23fff'%3E%3Ccircle cx='36' cy='14.9' r='0.9'/%3E%3Ccircle cx='14.9' cy='36' r='0.9'/%3E%3Ccircle cx='-14.9' cy='36' r='0.9'/%3E%3Ccircle cx='-36' cy='14.9' r='0.9'/%3E%3Ccircle cx='-36' cy='-14.9' r='0.9'/%3E%3Ccircle cx='-14.9' cy='-36' r='0.9'/%3E%3Ccircle cx='14.9' cy='-36' r='0.9'/%3E%3Ccircle cx='36' cy='-14.9' r='0.9'/%3E%3C/g%3E%3C/g%3E%3Cg id='pai' fill='none' stroke='%23fff' stroke-width='0.7'%3E%3Cpath d='M0 24C-15 19 -19 -2 -9 -15C-3 -23 9 -25 13 -17C16 -11 11 -7 7 -9'/%3E%3Cpath d='M-1 17C-10 13 -13 -1 -6 -10C-2 -15 5 -16 7 -11' stroke-width='0.55'/%3E%3Ccircle cx='-2' cy='3' r='1.3' fill='%23fff' stroke='none'/%3E%3Ccircle cx='-4' cy='-4' r='1' fill='%23fff' stroke='none'/%3E%3Ccircle cx='-1' cy='-10' r='0.8' fill='%23fff' stroke='none'/%3E%3C/g%3E%3Cg id='spr' fill='none' stroke='%23fff' stroke-width='0.7'%3E%3Cpath d='M-1 30Q-5 14 0 0'/%3E%3Cpath d='M0 0C-4 -6 -4 -14 0 -21C4 -14 4 -6 0 0Z'/%3E%3Cpath d='M0 0C-7 -4 -10 -11 -8 -18C-3 -14 -1 -7 0 0Z' stroke-width='0.6'/%3E%3Cpath d='M0 0C7 -4 10 -11 8 -18C3 -14 1 -7 0 0Z' stroke-width='0.6'/%3E%3Cpath d='M-2 20C-9 18 -14 12 -15 5C-9 9 -4 14 -2 20Z' stroke-width='0.6'/%3E%3Cpath d='M0 26C6 25 11 20 12 14C7 17 3 21 0 26Z' stroke-width='0.6'/%3E%3Ccircle cx='0' cy='-25' r='1' fill='%23fff' stroke='none'/%3E%3C/g%3E%3Cg id='mn'%3E%3Cpath d='M0 -9A9 9 0 1 0 0 9A12 12 0 1 1 0 -9Z' fill='none' stroke='%23fff' stroke-width='0.7'/%3E%3Ccircle cx='10' cy='-7' r='1.1' fill='%23fff'/%3E%3C/g%3E%3Cg id='q' fill='none' stroke='%23fff' stroke-width='0.6'%3E%3Cpath d='M0 -4C2 -7 2 -12 0 -16C-2 -12 -2 -7 0 -4Z'/%3E%3Cpath d='M4 0C7 -2 12 -2 16 0C12 2 7 2 4 0Z'/%3E%3Cpath d='M0 4C2 7 2 12 0 16C-2 12 -2 7 0 4Z'/%3E%3Cpath d='M-4 0C-7 -2 -12 -2 -16 0C-12 2 -7 2 -4 0Z'/%3E%3Ccircle r='2.2'/%3E%3C/g%3E%3Cg id='tri'%3E%3Cg fill='%23fff'%3E%3Ccircle cx='-5' cy='2' r='1.2'/%3E%3Ccircle cx='0' cy='-3' r='1.2'/%3E%3Ccircle cx='5' cy='2' r='1.2'/%3E%3C/g%3E%3Cpath d='M-7 6Q0 10 7 6' fill='none' stroke='%23fff' stroke-width='0.6'/%3E%3C/g%3E%3Cpath id='s' d='M0 -4.4Q0.9 -0.9 4.4 0Q0.9 0.9 0 4.4Q-0.9 0.9 -4.4 0Q-0.9 -0.9 0 -4.4Z' fill='%23fff'/%3E%3Cg id='bud' fill='none' stroke='%23fff' stroke-width='0.7'%3E%3Cpath d='M0 0C-4 -6 -4 -14 0 -21C4 -14 4 -6 0 0Z'/%3E%3Cpath d='M0 0C-6 -3 -8 -9 -7 -15C-3 -11 -1 -5 0 0Z' stroke-width='0.55'/%3E%3Cpath d='M0 0C6 -3 8 -9 7 -15C3 -11 1 -5 0 0Z' stroke-width='0.55'/%3E%3Cpath d='M-6 1Q0 5 6 1' stroke-width='0.6'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23med' transform='translate(62 66)'/%3E%3Cuse href='%23pai' transform='translate(232 64) rotate(-18)'/%3E%3Cuse href='%23spr' transform='translate(150 196) rotate(6)'/%3E%3Cuse href='%23mn' transform='translate(282 172) rotate(-25)'/%3E%3Cuse href='%23q' transform='translate(42 232)'/%3E%3Cuse href='%23pai' transform='translate(104 292) rotate(158) scale(0.72)'/%3E%3Cuse href='%23tri' transform='translate(252 256)'/%3E%3Cuse href='%23bud' transform='translate(296 292) rotate(24) scale(0.85)'/%3E%3Cuse href='%23s' transform='translate(160 34)'/%3E%3Cuse href='%23s' transform='translate(24 148) scale(0.8)'/%3E%3Cuse href='%23s' transform='translate(216 128) scale(0.7)'/%3E%3Cuse href='%23s' transform='translate(0 220)'/%3E%3Cuse href='%23s' transform='translate(320 220)'/%3E%3Cuse href='%23s' transform='translate(170 0) scale(0.8)'/%3E%3Cuse href='%23s' transform='translate(170 320) scale(0.8)'/%3E%3Cg fill='%23fff'%3E%3Ccircle cx='92' cy='162' r='0.9'/%3E%3Ccircle cx='298' cy='26' r='0.9'/%3E%3Ccircle cx='56' cy='302' r='0.9'/%3E%3Ccircle cx='264' cy='216' r='0.9'/%3E%3Ccircle cx='120' cy='104' r='0.9'/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cdefs%3E%3Cpath id='pt' d='M0 -8C4.5 -14 4.5 -24 0 -32C-4.5 -24 -4.5 -14 0 -8Z' fill='none' stroke='%23fff' stroke-width='0.75'/%3E%3Cg id='med'%3E%3Cuse href='%23pt'/%3E%3Cuse href='%23pt' transform='rotate(45)'/%3E%3Cuse href='%23pt' transform='rotate(90)'/%3E%3Cuse href='%23pt' transform='rotate(135)'/%3E%3Cuse href='%23pt' transform='rotate(180)'/%3E%3Cuse href='%23pt' transform='rotate(225)'/%3E%3Cuse href='%23pt' transform='rotate(270)'/%3E%3Cuse href='%23pt' transform='rotate(315)'/%3E%3Ccircle r='6' fill='none' stroke='%23fff' stroke-width='0.75'/%3E%3Ccircle r='12.5' fill='none' stroke='%23fff' stroke-width='0.6' stroke-dasharray='1 4'/%3E%3Ccircle r='1.7' fill='%23fff'/%3E%3Cg fill='%23fff'%3E%3Ccircle cx='36' cy='14.9' r='0.9'/%3E%3Ccircle cx='14.9' cy='36' r='0.9'/%3E%3Ccircle cx='-14.9' cy='36' r='0.9'/%3E%3Ccircle cx='-36' cy='14.9' r='0.9'/%3E%3Ccircle cx='-36' cy='-14.9' r='0.9'/%3E%3Ccircle cx='-14.9' cy='-36' r='0.9'/%3E%3Ccircle cx='14.9' cy='-36' r='0.9'/%3E%3Ccircle cx='36' cy='-14.9' r='0.9'/%3E%3C/g%3E%3C/g%3E%3Cg id='pai' fill='none' stroke='%23fff' stroke-width='0.7'%3E%3Cpath d='M0 24C-15 19 -19 -2 -9 -15C-3 -23 9 -25 13 -17C16 -11 11 -7 7 -9'/%3E%3Cpath d='M-1 17C-10 13 -13 -1 -6 -10C-2 -15 5 -16 7 -11' stroke-width='0.55'/%3E%3Ccircle cx='-2' cy='3' r='1.3' fill='%23fff' stroke='none'/%3E%3Ccircle cx='-4' cy='-4' r='1' fill='%23fff' stroke='none'/%3E%3Ccircle cx='-1' cy='-10' r='0.8' fill='%23fff' stroke='none'/%3E%3C/g%3E%3Cg id='spr' fill='none' stroke='%23fff' stroke-width='0.7'%3E%3Cpath d='M-1 30Q-5 14 0 0'/%3E%3Cpath d='M0 0C-4 -6 -4 -14 0 -21C4 -14 4 -6 0 0Z'/%3E%3Cpath d='M0 0C-7 -4 -10 -11 -8 -18C-3 -14 -1 -7 0 0Z' stroke-width='0.6'/%3E%3Cpath d='M0 0C7 -4 10 -11 8 -18C3 -14 1 -7 0 0Z' stroke-width='0.6'/%3E%3Cpath d='M-2 20C-9 18 -14 12 -15 5C-9 9 -4 14 -2 20Z' stroke-width='0.6'/%3E%3Cpath d='M0 26C6 25 11 20 12 14C7 17 3 21 0 26Z' stroke-width='0.6'/%3E%3Ccircle cx='0' cy='-25' r='1' fill='%23fff' stroke='none'/%3E%3C/g%3E%3Cg id='mn'%3E%3Cpath d='M0 -9A9 9 0 1 0 0 9A12 12 0 1 1 0 -9Z' fill='none' stroke='%23fff' stroke-width='0.7'/%3E%3Ccircle cx='10' cy='-7' r='1.1' fill='%23fff'/%3E%3C/g%3E%3Cg id='q' fill='none' stroke='%23fff' stroke-width='0.6'%3E%3Cpath d='M0 -4C2 -7 2 -12 0 -16C-2 -12 -2 -7 0 -4Z'/%3E%3Cpath d='M4 0C7 -2 12 -2 16 0C12 2 7 2 4 0Z'/%3E%3Cpath d='M0 4C2 7 2 12 0 16C-2 12 -2 7 0 4Z'/%3E%3Cpath d='M-4 0C-7 -2 -12 -2 -16 0C-12 2 -7 2 -4 0Z'/%3E%3Ccircle r='2.2'/%3E%3C/g%3E%3Cg id='tri'%3E%3Cg fill='%23fff'%3E%3Ccircle cx='-5' cy='2' r='1.2'/%3E%3Ccircle cx='0' cy='-3' r='1.2'/%3E%3Ccircle cx='5' cy='2' r='1.2'/%3E%3C/g%3E%3Cpath d='M-7 6Q0 10 7 6' fill='none' stroke='%23fff' stroke-width='0.6'/%3E%3C/g%3E%3Cpath id='s' d='M0 -4.4Q0.9 -0.9 4.4 0Q0.9 0.9 0 4.4Q-0.9 0.9 -4.4 0Q-0.9 -0.9 0 -4.4Z' fill='%23fff'/%3E%3Cg id='bud' fill='none' stroke='%23fff' stroke-width='0.7'%3E%3Cpath d='M0 0C-4 -6 -4 -14 0 -21C4 -14 4 -6 0 0Z'/%3E%3Cpath d='M0 0C-6 -3 -8 -9 -7 -15C-3 -11 -1 -5 0 0Z' stroke-width='0.55'/%3E%3Cpath d='M0 0C6 -3 8 -9 7 -15C3 -11 1 -5 0 0Z' stroke-width='0.55'/%3E%3Cpath d='M-6 1Q0 5 6 1' stroke-width='0.6'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23med' transform='translate(62 66)'/%3E%3Cuse href='%23pai' transform='translate(232 64) rotate(-18)'/%3E%3Cuse href='%23spr' transform='translate(150 196) rotate(6)'/%3E%3Cuse href='%23mn' transform='translate(282 172) rotate(-25)'/%3E%3Cuse href='%23q' transform='translate(42 232)'/%3E%3Cuse href='%23pai' transform='translate(104 292) rotate(158) scale(0.72)'/%3E%3Cuse href='%23tri' transform='translate(252 256)'/%3E%3Cuse href='%23bud' transform='translate(296 292) rotate(24) scale(0.85)'/%3E%3Cuse href='%23s' transform='translate(160 34)'/%3E%3Cuse href='%23s' transform='translate(24 148) scale(0.8)'/%3E%3Cuse href='%23s' transform='translate(216 128) scale(0.7)'/%3E%3Cuse href='%23s' transform='translate(0 220)'/%3E%3Cuse href='%23s' transform='translate(320 220)'/%3E%3Cuse href='%23s' transform='translate(170 0) scale(0.8)'/%3E%3Cuse href='%23s' transform='translate(170 320) scale(0.8)'/%3E%3Cg fill='%23fff'%3E%3Ccircle cx='92' cy='162' r='0.9'/%3E%3Ccircle cx='298' cy='26' r='0.9'/%3E%3Ccircle cx='56' cy='302' r='0.9'/%3E%3Ccircle cx='264' cy='216' r='0.9'/%3E%3Ccircle cx='120' cy='104' r='0.9'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Echo layer — same tile at 1.75x, offset half a tile, much fainter. Render as a
+   sibling BEFORE .chat-pattern so the fine layer paints on top. Ghost motifs
+   drifting behind sharp ones = layered-wallpaper depth, still one composite layer. */
+@utility chat-pattern-lg {
+  position: fixed;
+  inset: 0;
+  z-index: -9;
+  pointer-events: none;
+  background-color: var(--foreground);
+  opacity: 0.03;
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+  -webkit-mask-size: 560px 560px;
+  mask-size: 560px 560px;
+  -webkit-mask-position: 160px 120px;
+  mask-position: 160px 120px;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cdefs%3E%3Cpath id='pt' d='M0 -8C4.5 -14 4.5 -24 0 -32C-4.5 -24 -4.5 -14 0 -8Z' fill='none' stroke='%23fff' stroke-width='0.75'/%3E%3Cg id='med'%3E%3Cuse href='%23pt'/%3E%3Cuse href='%23pt' transform='rotate(45)'/%3E%3Cuse href='%23pt' transform='rotate(90)'/%3E%3Cuse href='%23pt' transform='rotate(135)'/%3E%3Cuse href='%23pt' transform='rotate(180)'/%3E%3Cuse href='%23pt' transform='rotate(225)'/%3E%3Cuse href='%23pt' transform='rotate(270)'/%3E%3Cuse href='%23pt' transform='rotate(315)'/%3E%3Ccircle r='6' fill='none' stroke='%23fff' stroke-width='0.75'/%3E%3Ccircle r='12.5' fill='none' stroke='%23fff' stroke-width='0.6' stroke-dasharray='1 4'/%3E%3Ccircle r='1.7' fill='%23fff'/%3E%3Cg fill='%23fff'%3E%3Ccircle cx='36' cy='14.9' r='0.9'/%3E%3Ccircle cx='14.9' cy='36' r='0.9'/%3E%3Ccircle cx='-14.9' cy='36' r='0.9'/%3E%3Ccircle cx='-36' cy='14.9' r='0.9'/%3E%3Ccircle cx='-36' cy='-14.9' r='0.9'/%3E%3Ccircle cx='-14.9' cy='-36' r='0.9'/%3E%3Ccircle cx='14.9' cy='-36' r='0.9'/%3E%3Ccircle cx='36' cy='-14.9' r='0.9'/%3E%3C/g%3E%3C/g%3E%3Cg id='pai' fill='none' stroke='%23fff' stroke-width='0.7'%3E%3Cpath d='M0 24C-15 19 -19 -2 -9 -15C-3 -23 9 -25 13 -17C16 -11 11 -7 7 -9'/%3E%3Cpath d='M-1 17C-10 13 -13 -1 -6 -10C-2 -15 5 -16 7 -11' stroke-width='0.55'/%3E%3Ccircle cx='-2' cy='3' r='1.3' fill='%23fff' stroke='none'/%3E%3Ccircle cx='-4' cy='-4' r='1' fill='%23fff' stroke='none'/%3E%3Ccircle cx='-1' cy='-10' r='0.8' fill='%23fff' stroke='none'/%3E%3C/g%3E%3Cg id='spr' fill='none' stroke='%23fff' stroke-width='0.7'%3E%3Cpath d='M-1 30Q-5 14 0 0'/%3E%3Cpath d='M0 0C-4 -6 -4 -14 0 -21C4 -14 4 -6 0 0Z'/%3E%3Cpath d='M0 0C-7 -4 -10 -11 -8 -18C-3 -14 -1 -7 0 0Z' stroke-width='0.6'/%3E%3Cpath d='M0 0C7 -4 10 -11 8 -18C3 -14 1 -7 0 0Z' stroke-width='0.6'/%3E%3Cpath d='M-2 20C-9 18 -14 12 -15 5C-9 9 -4 14 -2 20Z' stroke-width='0.6'/%3E%3Cpath d='M0 26C6 25 11 20 12 14C7 17 3 21 0 26Z' stroke-width='0.6'/%3E%3Ccircle cx='0' cy='-25' r='1' fill='%23fff' stroke='none'/%3E%3C/g%3E%3Cg id='mn'%3E%3Cpath d='M0 -9A9 9 0 1 0 0 9A12 12 0 1 1 0 -9Z' fill='none' stroke='%23fff' stroke-width='0.7'/%3E%3Ccircle cx='10' cy='-7' r='1.1' fill='%23fff'/%3E%3C/g%3E%3Cg id='q' fill='none' stroke='%23fff' stroke-width='0.6'%3E%3Cpath d='M0 -4C2 -7 2 -12 0 -16C-2 -12 -2 -7 0 -4Z'/%3E%3Cpath d='M4 0C7 -2 12 -2 16 0C12 2 7 2 4 0Z'/%3E%3Cpath d='M0 4C2 7 2 12 0 16C-2 12 -2 7 0 4Z'/%3E%3Cpath d='M-4 0C-7 -2 -12 -2 -16 0C-12 2 -7 2 -4 0Z'/%3E%3Ccircle r='2.2'/%3E%3C/g%3E%3Cg id='tri'%3E%3Cg fill='%23fff'%3E%3Ccircle cx='-5' cy='2' r='1.2'/%3E%3Ccircle cx='0' cy='-3' r='1.2'/%3E%3Ccircle cx='5' cy='2' r='1.2'/%3E%3C/g%3E%3Cpath d='M-7 6Q0 10 7 6' fill='none' stroke='%23fff' stroke-width='0.6'/%3E%3C/g%3E%3Cpath id='s' d='M0 -4.4Q0.9 -0.9 4.4 0Q0.9 0.9 0 4.4Q-0.9 0.9 -4.4 0Q-0.9 -0.9 0 -4.4Z' fill='%23fff'/%3E%3Cg id='bud' fill='none' stroke='%23fff' stroke-width='0.7'%3E%3Cpath d='M0 0C-4 -6 -4 -14 0 -21C4 -14 4 -6 0 0Z'/%3E%3Cpath d='M0 0C-6 -3 -8 -9 -7 -15C-3 -11 -1 -5 0 0Z' stroke-width='0.55'/%3E%3Cpath d='M0 0C6 -3 8 -9 7 -15C3 -11 1 -5 0 0Z' stroke-width='0.55'/%3E%3Cpath d='M-6 1Q0 5 6 1' stroke-width='0.6'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23med' transform='translate(62 66)'/%3E%3Cuse href='%23pai' transform='translate(232 64) rotate(-18)'/%3E%3Cuse href='%23spr' transform='translate(150 196) rotate(6)'/%3E%3Cuse href='%23mn' transform='translate(282 172) rotate(-25)'/%3E%3Cuse href='%23q' transform='translate(42 232)'/%3E%3Cuse href='%23pai' transform='translate(104 292) rotate(158) scale(0.72)'/%3E%3Cuse href='%23tri' transform='translate(252 256)'/%3E%3Cuse href='%23bud' transform='translate(296 292) rotate(24) scale(0.85)'/%3E%3Cuse href='%23s' transform='translate(160 34)'/%3E%3Cuse href='%23s' transform='translate(24 148) scale(0.8)'/%3E%3Cuse href='%23s' transform='translate(216 128) scale(0.7)'/%3E%3Cuse href='%23s' transform='translate(0 220)'/%3E%3Cuse href='%23s' transform='translate(320 220)'/%3E%3Cuse href='%23s' transform='translate(170 0) scale(0.8)'/%3E%3Cuse href='%23s' transform='translate(170 320) scale(0.8)'/%3E%3Cg fill='%23fff'%3E%3Ccircle cx='92' cy='162' r='0.9'/%3E%3Ccircle cx='298' cy='26' r='0.9'/%3E%3Ccircle cx='56' cy='302' r='0.9'/%3E%3Ccircle cx='264' cy='216' r='0.9'/%3E%3Ccircle cx='120' cy='104' r='0.9'/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cdefs%3E%3Cpath id='pt' d='M0 -8C4.5 -14 4.5 -24 0 -32C-4.5 -24 -4.5 -14 0 -8Z' fill='none' stroke='%23fff' stroke-width='0.75'/%3E%3Cg id='med'%3E%3Cuse href='%23pt'/%3E%3Cuse href='%23pt' transform='rotate(45)'/%3E%3Cuse href='%23pt' transform='rotate(90)'/%3E%3Cuse href='%23pt' transform='rotate(135)'/%3E%3Cuse href='%23pt' transform='rotate(180)'/%3E%3Cuse href='%23pt' transform='rotate(225)'/%3E%3Cuse href='%23pt' transform='rotate(270)'/%3E%3Cuse href='%23pt' transform='rotate(315)'/%3E%3Ccircle r='6' fill='none' stroke='%23fff' stroke-width='0.75'/%3E%3Ccircle r='12.5' fill='none' stroke='%23fff' stroke-width='0.6' stroke-dasharray='1 4'/%3E%3Ccircle r='1.7' fill='%23fff'/%3E%3Cg fill='%23fff'%3E%3Ccircle cx='36' cy='14.9' r='0.9'/%3E%3Ccircle cx='14.9' cy='36' r='0.9'/%3E%3Ccircle cx='-14.9' cy='36' r='0.9'/%3E%3Ccircle cx='-36' cy='14.9' r='0.9'/%3E%3Ccircle cx='-36' cy='-14.9' r='0.9'/%3E%3Ccircle cx='-14.9' cy='-36' r='0.9'/%3E%3Ccircle cx='14.9' cy='-36' r='0.9'/%3E%3Ccircle cx='36' cy='-14.9' r='0.9'/%3E%3C/g%3E%3C/g%3E%3Cg id='pai' fill='none' stroke='%23fff' stroke-width='0.7'%3E%3Cpath d='M0 24C-15 19 -19 -2 -9 -15C-3 -23 9 -25 13 -17C16 -11 11 -7 7 -9'/%3E%3Cpath d='M-1 17C-10 13 -13 -1 -6 -10C-2 -15 5 -16 7 -11' stroke-width='0.55'/%3E%3Ccircle cx='-2' cy='3' r='1.3' fill='%23fff' stroke='none'/%3E%3Ccircle cx='-4' cy='-4' r='1' fill='%23fff' stroke='none'/%3E%3Ccircle cx='-1' cy='-10' r='0.8' fill='%23fff' stroke='none'/%3E%3C/g%3E%3Cg id='spr' fill='none' stroke='%23fff' stroke-width='0.7'%3E%3Cpath d='M-1 30Q-5 14 0 0'/%3E%3Cpath d='M0 0C-4 -6 -4 -14 0 -21C4 -14 4 -6 0 0Z'/%3E%3Cpath d='M0 0C-7 -4 -10 -11 -8 -18C-3 -14 -1 -7 0 0Z' stroke-width='0.6'/%3E%3Cpath d='M0 0C7 -4 10 -11 8 -18C3 -14 1 -7 0 0Z' stroke-width='0.6'/%3E%3Cpath d='M-2 20C-9 18 -14 12 -15 5C-9 9 -4 14 -2 20Z' stroke-width='0.6'/%3E%3Cpath d='M0 26C6 25 11 20 12 14C7 17 3 21 0 26Z' stroke-width='0.6'/%3E%3Ccircle cx='0' cy='-25' r='1' fill='%23fff' stroke='none'/%3E%3C/g%3E%3Cg id='mn'%3E%3Cpath d='M0 -9A9 9 0 1 0 0 9A12 12 0 1 1 0 -9Z' fill='none' stroke='%23fff' stroke-width='0.7'/%3E%3Ccircle cx='10' cy='-7' r='1.1' fill='%23fff'/%3E%3C/g%3E%3Cg id='q' fill='none' stroke='%23fff' stroke-width='0.6'%3E%3Cpath d='M0 -4C2 -7 2 -12 0 -16C-2 -12 -2 -7 0 -4Z'/%3E%3Cpath d='M4 0C7 -2 12 -2 16 0C12 2 7 2 4 0Z'/%3E%3Cpath d='M0 4C2 7 2 12 0 16C-2 12 -2 7 0 4Z'/%3E%3Cpath d='M-4 0C-7 -2 -12 -2 -16 0C-12 2 -7 2 -4 0Z'/%3E%3Ccircle r='2.2'/%3E%3C/g%3E%3Cg id='tri'%3E%3Cg fill='%23fff'%3E%3Ccircle cx='-5' cy='2' r='1.2'/%3E%3Ccircle cx='0' cy='-3' r='1.2'/%3E%3Ccircle cx='5' cy='2' r='1.2'/%3E%3C/g%3E%3Cpath d='M-7 6Q0 10 7 6' fill='none' stroke='%23fff' stroke-width='0.6'/%3E%3C/g%3E%3Cpath id='s' d='M0 -4.4Q0.9 -0.9 4.4 0Q0.9 0.9 0 4.4Q-0.9 0.9 -4.4 0Q-0.9 -0.9 0 -4.4Z' fill='%23fff'/%3E%3Cg id='bud' fill='none' stroke='%23fff' stroke-width='0.7'%3E%3Cpath d='M0 0C-4 -6 -4 -14 0 -21C4 -14 4 -6 0 0Z'/%3E%3Cpath d='M0 0C-6 -3 -8 -9 -7 -15C-3 -11 -1 -5 0 0Z' stroke-width='0.55'/%3E%3Cpath d='M0 0C6 -3 8 -9 7 -15C3 -11 1 -5 0 0Z' stroke-width='0.55'/%3E%3Cpath d='M-6 1Q0 5 6 1' stroke-width='0.6'/%3E%3C/g%3E%3C/defs%3E%3Cuse href='%23med' transform='translate(62 66)'/%3E%3Cuse href='%23pai' transform='translate(232 64) rotate(-18)'/%3E%3Cuse href='%23spr' transform='translate(150 196) rotate(6)'/%3E%3Cuse href='%23mn' transform='translate(282 172) rotate(-25)'/%3E%3Cuse href='%23q' transform='translate(42 232)'/%3E%3Cuse href='%23pai' transform='translate(104 292) rotate(158) scale(0.72)'/%3E%3Cuse href='%23tri' transform='translate(252 256)'/%3E%3Cuse href='%23bud' transform='translate(296 292) rotate(24) scale(0.85)'/%3E%3Cuse href='%23s' transform='translate(160 34)'/%3E%3Cuse href='%23s' transform='translate(24 148) scale(0.8)'/%3E%3Cuse href='%23s' transform='translate(216 128) scale(0.7)'/%3E%3Cuse href='%23s' transform='translate(0 220)'/%3E%3Cuse href='%23s' transform='translate(320 220)'/%3E%3Cuse href='%23s' transform='translate(170 0) scale(0.8)'/%3E%3Cuse href='%23s' transform='translate(170 320) scale(0.8)'/%3E%3Cg fill='%23fff'%3E%3Ccircle cx='92' cy='162' r='0.9'/%3E%3Ccircle cx='298' cy='26' r='0.9'/%3E%3Ccircle cx='56' cy='302' r='0.9'/%3E%3Ccircle cx='264' cy='216' r='0.9'/%3E%3Ccircle cx='120' cy='104' r='0.9'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Midnight flavour — in dark mode the wallpaper turns to gold thread on ink
+   (embroidered silk, not gray print): the mask color mixes toward the brand
+   gold — picking up the brighter dark-theme --gold automatically — with
+   opacity lifted a touch since gold is dimmer than praxeti on midnight.
+   Light mode stays pure ink on praxeti (woodblock print). Unlayered on
+   purpose so it outranks the layered utility declarations; if color-mix is
+   unsupported the declaration drops and the foreground mask remains. */
+.dark .chat-pattern {
+  opacity: 0.075;
+  background-color: color-mix(in oklab, var(--gold) 78%, var(--foreground) 22%);
+}
+.dark .chat-pattern-lg {
+  opacity: 0.045;
+  background-color: color-mix(in oklab, var(--gold) 78%, var(--foreground) 22%);
+}
+
+/* Static page canvas — one paint, no layers, no animation */
+@utility app-canvas {
+  background-color: var(--background);
+  background-image: var(--canvas-wash);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+/* Chat scroller: momentum + contained overscroll + slim scrollbar.
+   overflow-anchor off — the browser's scroll anchoring fights the
+   programmatic keep-at-bottom behavior when the chip dock resizes. */
+@utility chat-scroll {
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  overflow-anchor: none;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.45 0.045 255 / 35%) transparent;
+}
+
+/* ---- Motion (compositor-only: transform + opacity) ---- */
+
+/* Boot choreography — while the inline splash covers the app, hold every
+   entry animation at its first frame so the staggered rises don't play out
+   unseen. main.tsx removes the class in the same frame the splash starts to
+   fade, letting the entrance choreography run as the curtain lifts. */
+html.boot-hold #root * {
+  animation-play-state: paused !important;
+}
+
+@keyframes msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Rich card entrance — a slower "bloom" (rise + settle) for wifi/ticket/contact
+   cards, delayed a beat after the bubble so the reply reads as choreography. */
+@keyframes bloom-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.93);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Illustration parallax-settle: the scene eases out of a slight zoom for depth. */
+@keyframes art-settle {
+  from {
+    opacity: 0.4;
+    transform: scale(1.14);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@utility animate-msg-in {
+  animation: msg-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@utility animate-chip-in {
+  animation: chip-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+/* Card bloom — the reply's illustrated card rises in after its bubble. */
+@utility animate-bloom {
+  animation: bloom-in 0.62s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.service-art-in {
+  animation: art-settle 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+  transform-origin: 50% 55%;
+  will-change: transform;
+}
+@utility animate-rise-in {
+  animation: rise-in 0.42s var(--ease-out-quint) both;
+}
+@utility animate-fade-in {
+  animation: fade-in 0.3s ease-out both;
+}
+
+/* Typing dots */
 @keyframes typing-dot {
   0%,
   20% {
     opacity: 0.25;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
   50% {
     opacity: 1;
-    transform: translateY(-2px) scale(1.06);
+    transform: translateY(-2px);
   }
   100% {
     opacity: 0.25;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
-
 .typing-dot {
   background-color: currentColor;
   display: inline-block;
   border-radius: 9999px;
   animation: typing-dot 1.2s ease-in-out infinite;
 }
-
 .typing-dot:nth-child(2) {
   animation-delay: 0.15s;
 }
@@ -163,9 +362,260 @@
   animation-delay: 0.3s;
 }
 
+/* Login error shake (referenced from Login page) */
+@keyframes error-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+.error-shake {
+  animation: error-shake 0.4s ease-in-out;
+}
+
+/* ------------------------------------------------------------------
+   Ambient background — depth + slow drift, compositor-only.
+   Softness lives in the gradient stops (no paint-heavy blur filter);
+   nothing animates but `transform` and one grain `opacity` shimmer.
+   ------------------------------------------------------------------ */
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  overflow: hidden;
+  pointer-events: none;
+  background-color: var(--background);
+  background-image: var(--canvas-wash);
+  background-repeat: no-repeat;
+}
+.ambient__blob {
+  position: absolute;
+  width: 130vw;
+  height: 130vw;
+  max-width: 720px;
+  max-height: 720px;
+  border-radius: 9999px;
+  will-change: transform;
+  transform: translateZ(0);
+}
+.ambient__blob--1 {
+  top: -34%;
+  right: -30%;
+  background: radial-gradient(circle at 50% 50%, var(--blob-1), transparent 62%);
+  animation: blob-drift-a 26s var(--ease-out-quint) infinite alternate;
+}
+.ambient__blob--2 {
+  bottom: -38%;
+  left: -32%;
+  background: radial-gradient(circle at 50% 50%, var(--blob-2), transparent 64%);
+  animation: blob-drift-b 32s var(--ease-out-quint) infinite alternate;
+}
+.ambient__blob--3 {
+  top: 28%;
+  left: 18%;
+  width: 90vw;
+  height: 90vw;
+  max-width: 460px;
+  max-height: 460px;
+  background: radial-gradient(circle at 50% 50%, var(--blob-3), transparent 66%);
+  animation: blob-drift-c 38s var(--ease-out-quint) infinite alternate;
+}
+/* Beams — a couple of soft skewed light streaks that sweep slowly across */
+.ambient__beams {
+  position: absolute;
+  inset: -25% -40%;
+  background-image:
+    linear-gradient(78deg, transparent 42%, var(--beam) 50%, transparent 58%),
+    linear-gradient(78deg, transparent 64%, var(--beam) 70%, transparent 76%);
+  will-change: transform;
+  animation: beam-sweep 22s ease-in-out infinite alternate;
+}
+/* Grain — a static noise tile, nudged in tiny steps for a live shimmer */
+.ambient__grain {
+  position: absolute;
+  inset: -6%;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  will-change: transform;
+  animation: grain-shift 5s steps(4) infinite;
+}
+
+@keyframes blob-drift-a {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(-8%, 6%, 0) scale(1.08);
+  }
+}
+@keyframes blob-drift-b {
+  from {
+    transform: translate3d(0, 0, 0) scale(1.05);
+  }
+  to {
+    transform: translate3d(9%, -7%, 0) scale(1);
+  }
+}
+@keyframes blob-drift-c {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(6%, 4%, 0);
+  }
+}
+@keyframes beam-sweep {
+  from {
+    transform: translate3d(-6%, 0, 0);
+  }
+  to {
+    transform: translate3d(6%, 0, 0);
+  }
+}
+@keyframes grain-shift {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(-2%, 1%, 0);
+  }
+  50% {
+    transform: translate3d(1%, -2%, 0);
+  }
+  75% {
+    transform: translate3d(2%, 1%, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* ---- Wi-Fi keycard: slow sheen sweep across the card face ---- */
+@keyframes keycard-sheen {
+  0% {
+    transform: translateX(-120%) rotate(8deg);
+  }
+  100% {
+    transform: translateX(220%) rotate(8deg);
+  }
+}
+.keycard-sheen {
+  animation: keycard-sheen 5.5s ease-in-out 0.6s infinite;
+}
+
+/* ---- Splash: the logo settles in with a soft scale + lift ---- */
+@keyframes splash-mark {
+  from {
+    opacity: 0;
+    transform: scale(0.86) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@utility animate-splash-mark {
+  animation: splash-mark 0.6s var(--ease-out-quint) both;
+}
+
+/* ---- Brand lockup: gentle gold glow breathing on the wordmark ---- */
+@keyframes lockup-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+.lockup-glow {
+  animation: lockup-glow 3.4s ease-in-out infinite;
+}
+
+/* ---- Login hero: twinkling stars, breathing moon halo, warm windows ---- */
+@keyframes lh-twinkle {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 1; }
+}
+.lh-tw { animation: lh-twinkle 3.4s ease-in-out infinite; }
+.lh-tw1 { animation-duration: 3.2s; animation-delay: 0s; }
+.lh-tw2 { animation-duration: 4.1s; animation-delay: -1.2s; }
+.lh-tw3 { animation-duration: 2.8s; animation-delay: -0.6s; }
+@keyframes lh-halo {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+.lh-moon-halo { transform-box: fill-box; transform-origin: center; animation: lh-halo 7s ease-in-out infinite; }
+@keyframes lh-window {
+  0%, 100% { opacity: 0.92; }
+  50% { opacity: 1; }
+}
+.lh-window { animation: lh-window 5s ease-in-out infinite; }
+
+/* ---- Service docket: one-shot "logging" fill, then a soft resting ping ---- */
+@keyframes ticket-track {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(0.42);
+  }
+}
+.ticket-track {
+  transform-origin: left;
+  animation: ticket-track 0.9s var(--ease-out-quint) 0.15s both;
+}
+@keyframes ticket-ping {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.ticket-ping {
+  animation: ticket-ping 1.8s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .ambient__blob,
+  .ambient__beams,
+  .ambient__grain,
+  .keycard-sheen,
+  .lockup-glow,
+  .ticket-ping,
+  .lh-tw,
+  .lh-moon-halo,
+  .lh-window {
+    animation: none !important;
+  }
+  .ticket-track,
+  .animate-splash-mark,
+  .service-art-in {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
+  }
   .typing-dot {
     animation: none;
     opacity: 0.6;
+  }
+  .animate-msg-in,
+  .animate-chip-in,
+  .animate-bloom,
+  .animate-rise-in,
+  .animate-fade-in,
+  .error-shake {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
   }
 }

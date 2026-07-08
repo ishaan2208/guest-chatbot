@@ -1,30 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { useSetRecoilState } from "recoil";
 import {
-  Home,
   MapPin,
   Clock,
   Users,
-  Bed,
-  ArrowRight,
-  Sparkles,
-  Wifi,
-  Tv,
-  Coffee,
-  Wind
+  ChevronRight,
+  AlertCircle,
 } from "lucide-react";
 
 import axios from "../lib/axios.config";
-import { Button } from "../components/ui/button";
-import { PageTransition, StaggeredList } from "../components/animations/page-transitions";
-import { InteractiveCard, AnimatedText } from "../components/animations/micro-interactions";
-import { useCelebration } from "../components/animations/celebration";
 import { useGuestProfile } from "../stores/guestProfile";
 import { useUIState } from "../stores/ui";
 import { guestStorage } from "../services/storage";
 import { hardSignout } from "@/lib/sessionGuard";
+import AmbientBackground from "@/components/AmbientBackground";
+import Splash from "@/components/Splash";
 import { bookingAtom } from "@/store/booking.recoil";
 import type { Booking as BookingStoreType } from "@/types/booking.types";
 import { stayCheckIn, stayCheckOut } from "@/lib/booking-room-dates";
@@ -166,10 +157,15 @@ const getCachedBooking = (
   return null;
 };
 
+const formatDate = (value: string | Date) => {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+};
+
 export default function RoomPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { celebrate, celebrations } = useCelebration();
   const { updateProfile, getContextualGreeting } = useGuestProfile();
   const { addNotification } = useUIState();
   const setBookingStore = useSetRecoilState(bookingAtom);
@@ -336,8 +332,6 @@ export default function RoomPage() {
       roomNumber: roomNumber
     });
 
-    celebrate('success', `Welcome to Room ${roomNumber}!`);
-
     setTimeout(() => {
       navigate(`/room/chatbot`);
       setShowOutlet(true);
@@ -355,263 +349,134 @@ export default function RoomPage() {
     return nights;
   };
 
-  // Get room amenities (mock data - in real app this would come from booking)
-  const getRoomAmenities = () => [
-    { icon: Wifi, label: "Free WiFi" },
-    { icon: Tv, label: "Smart TV" },
-    { icon: Coffee, label: "Coffee Maker" },
-    { icon: Wind, label: "Air Conditioning" },
-  ];
-
   // Render outlet when navigating to chatbot
   if (showOutlet || isChatbotRoute) {
-    return (
-      <PageTransition>
-        <Outlet />
-      </PageTransition>
-    );
+    return <Outlet />;
   }
 
   // Loading state
   if (loading) {
-    return (
-      <PageTransition className="min-h-screen bg-linear-to-br from-background via-background/95 to-primary/5">
-        <div className="flex items-center justify-center min-h-screen p-4">
-          <motion.div
-            className="text-center space-y-6"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-          >
-            <motion.div
-              animate={{
-                rotateY: [0, 180, 360],
-                scale: [1, 1.1, 1]
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center"
-            >
-              <Home className="w-8 h-8 text-primary" />
-            </motion.div>
-
-            <div>
-              <AnimatedText
-                text="Preparing your stay..."
-                className="text-xl font-semibold text-foreground"
-              />
-              <p className="text-muted-foreground mt-2">
-                Loading your booking details
-              </p>
-            </div>
-          </motion.div>
-        </div>
-      </PageTransition>
-    );
+    return <Splash message="Preparing your stay" sub="Loading your booking details…" />;
   }
 
   // Error state
   if (error) {
     return (
-      <PageTransition className="min-h-screen bg-linear-to-br from-background via-destructive/5 to-background">
-        <div className="flex items-center justify-center min-h-screen p-4">
-          <motion.div
-            className="text-center space-y-4 max-w-md"
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
+      <div className="relative flex min-h-dvh items-center justify-center p-6">
+        <AmbientBackground />
+        <div className="animate-rise-in w-full max-w-md text-center">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-destructive/25 bg-destructive/5">
+            <AlertCircle className="h-6 w-6 text-destructive" aria-hidden="true" />
+          </span>
+          <h2 className="mt-5 font-display text-2xl tracking-tight text-foreground">
+            Something went wrong
+          </h2>
+          <p className="mt-2 text-[15px] text-muted-foreground">{error}</p>
+          <button
+            type="button"
+            onClick={() => navigate("/login")}
+            className="mt-6 inline-flex h-12 items-center justify-center rounded-full bg-primary px-8 text-[15px] font-semibold text-primary-foreground transition-[opacity,transform] duration-150 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-safe:active:scale-[0.98]"
           >
-            <div className="w-16 h-16 mx-auto bg-destructive/10 rounded-full flex items-center justify-center">
-              <Home className="w-8 h-8 text-destructive" />
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold text-foreground mb-2">
-                Oops! Something went wrong
-              </h2>
-              <p className="text-muted-foreground mb-4">{error}</p>
-              <Button
-                onClick={() => navigate("/login")}
-                className="bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                Return to Sign In
-              </Button>
-            </div>
-          </motion.div>
+            Return to sign in
+          </button>
         </div>
-      </PageTransition>
+      </div>
     );
   }
 
   // Room selection screen
   return (
-    <PageTransition className="min-h-screen bg-linear-to-br from-background via-background/95 to-primary/5">
-      <div className="min-h-screen p-4">
-
-        {/* Header */}
-        <motion.div
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className="text-center space-y-4 mb-8"
-        >
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              <Sparkles className="w-6 h-6 text-primary" />
-            </motion.div>
-            <h1 className="text-2xl font-bold text-foreground">
-              <AnimatedText text="Welcome to Your Stay!" />
-            </h1>
-          </div>
-
+    <div className="relative min-h-dvh px-5 py-10">
+      <AmbientBackground />
+      <div className="mx-auto w-full max-w-md">
+        {/* Greeting */}
+        <div className="animate-rise-in">
+          <h1 className="font-display text-[1.75rem] leading-tight tracking-tight text-foreground">
+            Welcome to your stay
+          </h1>
           {booking && (
-            <div className="space-y-2">
-              <p className="text-lg text-foreground font-medium">
-                {getContextualGreeting()}
-              </p>
-              {booking.BookingRoom.length > 1 && (
-                <p className="text-muted-foreground">
-                  You have multiple rooms. Please select your room to continue.
-                </p>
-              )}
-            </div>
+            <p className="mt-1.5 text-[15px] text-muted-foreground">
+              {getContextualGreeting()}
+            </p>
           )}
-        </motion.div>
+        </div>
 
-        {/* Booking Summary Card */}
+        {/* Property summary */}
         {booking && (
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.1 }}
-            className="bg-card/50 backdrop-blur-sm border border-border/50 rounded-xl p-6 mb-6 shadow-lg"
+          <div
+            className="animate-rise-in mt-6 rounded-3xl border border-border bg-card p-5 shadow-(--shadow-card)"
+            style={{ animationDelay: "60ms" }}
           >
-            <div className="space-y-4">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
-                  <MapPin className="w-6 h-6 text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-foreground mb-1">
-                    {booking.property.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {booking.property.address}
-                  </p>
-                </div>
+            <div className="flex items-start gap-3.5">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-secondary">
+                <MapPin className="h-5 w-5 text-foreground" aria-hidden="true" />
+              </span>
+              <div className="min-w-0">
+                <h3 className="font-semibold leading-snug text-foreground">
+                  {booking.property.name}
+                </h3>
+                <p className="mt-0.5 text-sm leading-relaxed text-muted-foreground">
+                  {booking.property.address}
+                </p>
               </div>
-
-              {booking.BookingRoom[0] && (
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">
-                      {getStayDuration()} nights
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">
-                      {booking.BookingRoom[0].occupancy} guests
-                    </span>
-                  </div>
-                </div>
-              )}
             </div>
-          </motion.div>
+
+            {booking.BookingRoom[0] && (
+              <div className="mt-4 flex gap-6 border-t border-border/70 pt-4 text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5 tabular-nums">
+                  <Clock className="h-4 w-4" aria-hidden="true" />
+                  {getStayDuration()} nights
+                </span>
+                <span className="flex items-center gap-1.5 tabular-nums">
+                  <Users className="h-4 w-4" aria-hidden="true" />
+                  {booking.BookingRoom[0].occupancy} guests
+                </span>
+              </div>
+            )}
+          </div>
         )}
 
-        {/* Room Selection */}
+        {/* Room selection */}
         {booking && (
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-foreground text-center">
-              {booking.BookingRoom.length === 1 ? "Your Room" : "Select Your Room"}
+          <div className="mt-8">
+            <h2 className="text-[13px] font-semibold uppercase tracking-wide text-muted-foreground">
+              {booking.BookingRoom.length === 1 ? "Your room" : "Select your room"}
             </h2>
 
-            <StaggeredList className="space-y-4">
-              {booking.BookingRoom.map((room) => (
-                <motion.div key={room.id}>
-                  <InteractiveCard
-                    onClick={() => handleRoomClick(String(room.id), room.roomNumber)}
-                    className="cursor-pointer"
-                  >
-                    <div className="bg-card/70 backdrop-blur-sm border border-border/50 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                            <Bed className="w-6 h-6 text-primary" />
-                          </div>
-                          <div>
-                            <h3 className="text-xl font-semibold text-foreground">
-                              Room {room.roomNumber}
-                            </h3>
-                            <p className="text-muted-foreground text-sm">
-                              {room.roomPlan} • {room.occupancy} guests
-                            </p>
-                          </div>
-                        </div>
-
-                        <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                      </div>
-
-                      {/* Room amenities */}
-                      <div className="flex items-center gap-4 mt-4 pt-4 border-t border-border/30">
-                        {getRoomAmenities().slice(0, 4).map((amenity, idx) => (
-                          <div key={idx} className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <amenity.icon className="w-3 h-3" />
-                            <span>{amenity.label}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Check-in/out dates */}
-                      <div className="flex justify-between text-xs text-muted-foreground mt-3">
-                        <span>Check-in: {new Date(stayCheckIn(room)).toLocaleDateString()}</span>
-                        <span>Check-out: {new Date(stayCheckOut(room)).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                  </InteractiveCard>
-                </motion.div>
+            <div className="mt-3 space-y-3">
+              {booking.BookingRoom.map((room, idx) => (
+                <button
+                  key={room.id}
+                  type="button"
+                  onClick={() => handleRoomClick(String(room.id), room.roomNumber)}
+                  style={{ animationDelay: `${120 + idx * 50}ms` }}
+                  className="animate-rise-in flex w-full items-center gap-4 rounded-3xl border border-border bg-card p-5 text-left shadow-(--shadow-card) transition-[border-color,transform] duration-150 ease-out touch-manipulation hover:border-foreground/25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-safe:active:scale-[0.98]"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="font-display text-2xl leading-none tracking-tight text-foreground tabular-nums">
+                      Room {room.roomNumber}
+                    </p>
+                    <p className="mt-1.5 text-sm text-muted-foreground">
+                      {room.roomPlan} · {room.occupancy} guests
+                    </p>
+                    <p className="mt-2.5 text-[13px] text-muted-foreground tabular-nums">
+                      {formatDate(stayCheckIn(room))} → {formatDate(stayCheckOut(room))}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                </button>
               ))}
-            </StaggeredList>
+            </div>
           </div>
         )}
 
-        {/* Quick Actions */}
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="mt-8 text-center"
+        <p
+          className="animate-rise-in mt-8 text-center text-[13px] text-muted-foreground"
+          style={{ animationDelay: "240ms" }}
         >
-          <p className="text-sm text-muted-foreground mb-4">
-            Once selected, you'll have access to all guest services
-          </p>
-
-          <div className="flex justify-center gap-4">
-            {[
-              { icon: "🛎️", label: "Concierge" },
-              { icon: "🏨", label: "Room Service" },
-              { icon: "🧹", label: "Housekeeping" },
-            ].map((service, index) => (
-              <motion.div
-                key={service.label}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 0.4 + index * 0.1 }}
-                className="flex flex-col items-center gap-1"
-              >
-                <div className="text-2xl">{service.icon}</div>
-                <span className="text-xs text-muted-foreground">{service.label}</span>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {celebrations}
+          Once selected, you can request towels, housekeeping, food and more.
+        </p>
       </div>
-    </PageTransition>
+    </div>
   );
 }

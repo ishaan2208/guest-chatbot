@@ -31,6 +31,7 @@ import {
   Apple,
   Scissors,
   Shield,
+  Smile,
 } from "lucide-react";
 
 /** tiny helper to render any lucide with consistent sizing */
@@ -47,6 +48,7 @@ export const ITEM_ICON: Record<string, ReactNode> = {
   SOAP_REQUEST: i(Sparkles), // swap if you add a dedicated soap icon later
   BODY_WASH: i(Droplets),
   SLIPPER: i(Shirt), // closest fit; can replace with a shoe icon if you add one
+  DENTAL_KIT: i(Smile),
   SHAVING_KIT: i(Scissors), // or Razor if available in your version
   SANITARY_PADS: i(Shield),
   IRON_REQUEST: i(Shirt),

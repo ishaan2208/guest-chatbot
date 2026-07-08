@@ -1,74 +1,122 @@
+import { Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ChatAvatar from "./Avatar";
 import TypingIndicator from "./TypingIndicator";
-import { motion, useReducedMotion } from "framer-motion";
+import WifiCard, { type WifiCredential } from "./WifiCard";
+import ServiceTicketCard, { type ServiceTicket } from "./ServiceTicketCard";
+import ContactCard, { type ContactInfo } from "./ContactCard";
 
+interface BubbleProps {
+  sender: "bot" | "guest" | "typing";
+  text: string;
+  /** Optional SLA/receipt line under a bot reply (e.g. "Within 15 min") */
+  sla?: string;
+  /** When present, the bot message renders the Wi-Fi keycard */
+  wifi?: WifiCredential;
+  /** When present, the bot message renders the service request docket */
+  ticket?: ServiceTicket;
+  /** When present, the bot message renders the tap-to-call contact card */
+  contact?: ContactInfo;
+  /** First message of a same-sender group: shows the avatar and the accent corner */
+  groupStart?: boolean;
+  /** New messages slide in; restored history renders static */
+  animate?: boolean;
+}
+
+/**
+ * One chat message. Entrance is a one-shot CSS animation (transform/opacity
+ * only) so a 200-message transcript stays plain DOM — no per-bubble JS.
+ * A bot message may carry one rich card (wifi / ticket / contact) below its text.
+ */
 export default function Bubble({
   sender,
   text,
   sla,
-}: {
-  sender: "bot" | "guest" | "typing";
-  text: string;
-  sla?: string;
-}) {
+  wifi,
+  ticket,
+  contact,
+  groupStart = true,
+  animate = true,
+}: BubbleProps) {
   const isGuest = sender === "guest";
-  const prefersReducedMotion = useReducedMotion();
+  const isTyping = sender === "typing";
+  const hasCard = Boolean(wifi || ticket || contact);
 
-  // 👉 Handle typing as a dedicated branch (no tail, no text)
-  if (sender === "typing") {
+  if (isGuest) {
     return (
-      <div className="flex w-full gap-2 items-center justify-start">
-        <ChatAvatar sender="bot" />
-        <div className="max-w-[75%] rounded-2xl bg-white px-3 py-2 text-sm text-foreground shadow-md dark:bg-slate-800">
-          <TypingIndicator />
-        </div>
+      <div
+        className={cn(
+          "flex w-full justify-end",
+          animate && "animate-msg-in",
+          !groupStart && "-mt-1"
+        )}
+      >
+        <span
+          className={cn(
+            "max-w-[80%] whitespace-pre-line rounded-[1.25rem] bg-primary px-4 py-2.5 text-[15px] leading-relaxed text-primary-foreground",
+            groupStart && "rounded-tr-[0.375rem]"
+          )}
+        >
+          {text}
+        </span>
       </div>
     );
   }
-  // Guest bubbles appear instantly for clear feedback; bot bubbles animate in
-  const motionProps = prefersReducedMotion || isGuest
-    ? { initial: false as const, animate: { opacity: 1, y: 0 } }
-    : {
-        initial: { opacity: 0, y: 8 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.24, ease: [0.22, 1, 0.36, 1] as const },
-      };
+
+  const showAvatar = groupStart || isTyping;
+  const bubbleChrome =
+    "rounded-[1.25rem] border border-border/60 bg-card px-4 py-2.5 text-[15px] leading-relaxed text-card-foreground shadow-(--shadow-bubble)";
 
   return (
-    <motion.div {...motionProps}>
+    <div
+      className={cn(
+        "flex w-full items-start gap-2",
+        animate && "animate-msg-in",
+        !groupStart && "-mt-1"
+      )}
+    >
+      {showAvatar ? (
+        <ChatAvatar sender="bot" size="sm" className="mt-0.5" />
+      ) : (
+        <span aria-hidden="true" className="w-7 shrink-0" />
+      )}
+
       <div
         className={cn(
-          "flex w-full gap-2 items-center",
-          isGuest ? "justify-end" : "justify-start"
+          "flex min-w-0 flex-col gap-2",
+          hasCard ? "w-full max-w-[20rem]" : "max-w-[80%]"
         )}
       >
-        {sender === "bot" && <ChatAvatar sender="bot" />}
-
-        {/* {sender === "bot" && <ChatAvatar sender="typing" />} */}
-
-        <span
-          className={cn(
-            "relative max-w-[75%] rounded-2xl p-3 text-sm leading-relaxed shadow-md whitespace-pre-line",
-            isGuest
-              ? "bg-gradient-to-tr from-fuchsia-700/60 via-violet-700 to-violet-700 text-white shadow-[0_1px_2px_rgba(0,0,0,0.2)]"
-              : "bg-white dark:bg-slate-800 shadow-[0_1px_2px_rgba(0,0,0,0.2)]",
-            // tails
-            "after:absolute after:bottom-[-6px] after:w-4 after:h-5  after:content-['']",
-            isGuest
-              ? "after:right-[0px] after:clip-path-[polygon(100%_0,0_0,0_100%)] after:rounded-bl-[10px]  after:bg-violet-700 "
-              :             "after:left-[0px] dark:after:bg-slate-800 after:bg-white  after:clip-path-[polygon(100%_0,100%_0,100%_100%)] after:rounded-br-[10px]"
-          )}
-        >
-          <span className="block">{text}</span>
-          {sla && sender === "bot" && (
-            <span className="mt-1.5 block text-xs opacity-80">
-              ⏱ {sla}
-            </span>
-          )}
-        </span>
-        {sender === "guest" && <ChatAvatar sender="guest" />}
+        {isTyping ? (
+          <span className={cn(bubbleChrome, "rounded-tl-[0.375rem]")}>
+            <TypingIndicator />
+          </span>
+        ) : (
+          <>
+            {text && (
+              <span className={cn(bubbleChrome, showAvatar && "rounded-tl-[0.375rem]")}>
+                <span className="block whitespace-pre-line">{text}</span>
+                {sla && !hasCard && (
+                  <span className="mt-2 flex items-center gap-1.5 border-t border-border/60 pt-2 text-[12.5px] font-medium tabular-nums text-success">
+                    <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                    {sla}
+                  </span>
+                )}
+              </span>
+            )}
+            {hasCard && (
+              <div
+                className={cn(animate && "animate-bloom")}
+                style={animate ? { animationDelay: "0.26s" } : undefined}
+              >
+                {wifi && <WifiCard network={wifi.network} password={wifi.password} />}
+                {ticket && <ServiceTicketCard {...ticket} />}
+                {contact && <ContactCard {...contact} />}
+              </div>
+            )}
+          </>
+        )}
       </div>
-    </motion.div>
+    </div>
   );
 }

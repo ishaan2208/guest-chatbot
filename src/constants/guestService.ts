@@ -178,17 +178,19 @@ export function useGuestServiceMenu() {
         },
         {
           type: "SANITARY_PADS",
-          label: "Sanitary pads (₹)",
-          kind: "CHARGEABLE",
+          label: "Sanitary pads",
+          kind: "FUNCTION",
           featured: false,
-          isChargeable: true,
-          reply: `Certainly. This will be added to your room bill. Sanitary pads will be sent to ${roomNo} shortly.`,
+          isChargeable: false,
+          free: true,
+          etaMinutes: 10,
+          reply: `Of course — complimentary sanitary pads are on the way to ${roomNo}. No charge at all.`,
           action: (_details?: string) =>
             actionableAction(
               bookingRoomId,
               booking as Booking,
               "SANITARY_PADS",
-              true
+              false
             ),
         },
         {
@@ -496,6 +498,8 @@ export interface GuestServiceItem {
   availableUntil?: string;
   /** e.g. "Housekeeping", "Front Desk" */
   handledBy?: string;
+  /** Complimentary item — surfaces an explicit "Free" badge instead of a price */
+  free?: boolean;
 }
 
 export interface GuestServiceCategory {

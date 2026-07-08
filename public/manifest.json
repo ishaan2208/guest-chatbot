@@ -1,21 +1,21 @@
 {
-  "name": "Zenvana Guest Chatbot",
-  "short_name": "Zenvana Guest",
-  "description": "Mobile-first hotel guest services app.",
+  "name": "Zenvana Guest Concierge",
+  "short_name": "Zenvana",
+  "description": "Request towels, housekeeping, room service and more from your room.",
   "start_url": "/login",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#2563eb",
+  "background_color": "#F6F7ED",
+  "theme_color": "#001F3F",
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/Zenvana logo.svg",
+      "src": "/zen-mark.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/Zenvana logo.svg",
+      "src": "/zen-mark.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any"

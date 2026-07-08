@@ -1,17 +1,79 @@
 <!DOCTYPE html>
-<html lang="en">
+<!-- boot-hold pauses the app's entry animations until the splash lifts
+     (removed by main.tsx) so the staggered entrance plays on reveal. -->
+<html lang="en" class="boot-hold">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="Zenvana logo.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#2563eb" />
+    <link rel="icon" type="image/svg+xml" href="/zen-mark.svg" />
+    <!-- Warm up the API origin (DNS + TLS) before the first booking fetch -->
+    <link rel="preconnect" href="https://api.staysystems.in" crossorigin />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content="Zenvana guest concierge — request towels, housekeeping, room service and more from your room." />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F6F7ED" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#10141F" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Zenvana Guest" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Zenvana" />
     <link rel="manifest" href="/manifest.json" />
-    <title>Chatbot</title>
+    <title>Zenvana · Guest Concierge</title>
+    <style>
+      /* Boot splash — painted instantly, before the JS bundle parses, so a
+         budget phone shows the brand rather than a white screen. Removed by
+         main.tsx once React mounts. Self-contained: system serif, no fonts. */
+      /* Boot splash — near-black + gold to match the Zenvana brand splash, so
+         the handoff into the React splash has no light-to-dark flash. */
+      #boot-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        background:
+          radial-gradient(70% 55% at 50% 110%, rgba(212, 175, 55, 0.1) 0%, transparent 60%),
+          #050505;
+        transition: opacity 0.45s ease;
+      }
+      #boot-splash.is-hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #boot-splash img {
+        width: 140px;
+        height: 140px;
+        animation: boot-pop 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+        filter: drop-shadow(0 0 24px rgba(232, 214, 147, 0.28));
+      }
+      #boot-splash .word {
+        font-family: Fraunces, Georgia, "Times New Roman", serif;
+        font-weight: 600;
+        font-size: 22px;
+        letter-spacing: 0.32em;
+        text-indent: 0.32em;
+        color: #e8d693;
+        animation: boot-glow 3s ease-in-out infinite;
+      }
+      @keyframes boot-pop {
+        from { transform: scale(0.9); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+      }
+      @keyframes boot-glow {
+        0%, 100% { opacity: 0.72; }
+        50% { opacity: 1; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #boot-splash img, #boot-splash .word { animation: none; }
+      }
+    </style>
   </head>
   <body>
+    <div id="boot-splash" aria-hidden="true">
+      <img src="/zenvana-logo.svg" alt="" width="140" height="140" />
+      <span class="word">ZENVANA</span>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

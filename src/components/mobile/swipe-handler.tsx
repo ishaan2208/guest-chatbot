@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { useSwipeNavigation, usePullToRefresh } from '../../hooks/useTouch';
 import { cn } from '../../lib/utils';
 import { ArrowLeft, ArrowRight, RefreshCw } from 'lucide-react';
@@ -43,23 +42,18 @@ export function SwipeHandler({
     >
       {/* Pull to refresh indicator */}
       {enablePullToRefresh && isRefreshing && (
-        <motion.div
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute top-0 left-0 right-0 z-10 flex justify-center py-4"
-        >
-          <div className="flex items-center gap-2 text-primary">
-            <RefreshCw className="w-4 h-4 animate-spin" />
-            <span className="text-sm font-medium">Refreshing...</span>
+        <div className="animate-fade-in absolute inset-x-0 top-0 z-10 flex justify-center py-3">
+          <div className="flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-foreground shadow-(--shadow-bubble)">
+            <RefreshCw className="h-4 w-4 animate-spin" />
+            <span className="text-sm font-medium">Refreshing…</span>
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* Swipe indicators */}
       {showBackIndicator && onSwipeRight && (
         <SwipeIndicator
-          direction="right"
-          icon={<ArrowLeft className="w-5 h-5" />}
+          icon={<ArrowLeft className="h-5 w-5" />}
           label="Back"
           side="left"
         />
@@ -67,8 +61,7 @@ export function SwipeHandler({
 
       {showForwardIndicator && onSwipeLeft && (
         <SwipeIndicator
-          direction="left"
-          icon={<ArrowRight className="w-5 h-5" />}
+          icon={<ArrowRight className="h-5 w-5" />}
           label="Forward"
           side="right"
         />
@@ -83,7 +76,6 @@ export function SwipeHandler({
 }
 
 interface SwipeIndicatorProps {
-  direction: 'left' | 'right';
   icon: React.ReactNode;
   label: string;
   side: 'left' | 'right';
@@ -91,15 +83,11 @@ interface SwipeIndicatorProps {
 
 function SwipeIndicator({ icon, label, side }: SwipeIndicatorProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, x: side === 'left' ? -20 : 20 }}
-      animate={{ opacity: 0.6, x: 0 }}
+    <div
       className={cn(
-        "absolute top-1/2 transform -translate-y-1/2 z-10",
-        "bg-background/80 backdrop-blur-sm",
-        "border border-border rounded-lg",
-        "px-3 py-2 shadow-lg",
-        "flex items-center gap-2",
+        "animate-fade-in absolute top-1/2 z-10 -translate-y-1/2 opacity-60",
+        "rounded-full border border-border bg-card",
+        "flex items-center gap-2 px-3 py-2 shadow-(--shadow-bubble)",
         side === 'left' ? "left-4" : "right-4"
       )}
     >
@@ -107,7 +95,7 @@ function SwipeIndicator({ icon, label, side }: SwipeIndicatorProps) {
       <span className="text-sm font-medium text-muted-foreground">
         {label}
       </span>
-    </motion.div>
+    </div>
   );
 }
 
@@ -150,7 +138,6 @@ export function ServiceCategorySwipeHandler({
 }) {
   return (
     <SwipeHandler
-      className=''
       onSwipeRight={canGoBack ? onBack : undefined}
       onSwipeLeft={canGoForward ? onNext : undefined}
       showBackIndicator={canGoBack}

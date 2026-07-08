@@ -1,5 +1,5 @@
-const CACHE_NAME = "zenvana-guest-v1";
-const APP_SHELL = ["/", "/login", "/room", "/manifest.json", "/Zenvana logo.svg"];
+const CACHE_NAME = "zenvana-guest-v4";
+const APP_SHELL = ["/", "/login", "/room", "/manifest.json", "/zen-mark.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
