@@ -174,7 +174,7 @@
   z-index: -9;
   pointer-events: none;
   background-color: var(--foreground);
-  opacity: 0.06;
+  opacity: 0.135;
   -webkit-mask-repeat: repeat;
   mask-repeat: repeat;
   -webkit-mask-size: 320px 320px;
@@ -192,7 +192,7 @@
   z-index: -9;
   pointer-events: none;
   background-color: var(--foreground);
-  opacity: 0.03;
+  opacity: 0.07;
   -webkit-mask-repeat: repeat;
   mask-repeat: repeat;
   -webkit-mask-size: 560px 560px;
@@ -211,11 +211,11 @@
    purpose so it outranks the layered utility declarations; if color-mix is
    unsupported the declaration drops and the foreground mask remains. */
 .dark .chat-pattern {
-  opacity: 0.075;
+  opacity: 0.11;
   background-color: color-mix(in oklab, var(--gold) 78%, var(--foreground) 22%);
 }
 .dark .chat-pattern-lg {
-  opacity: 0.045;
+  opacity: 0.065;
   background-color: color-mix(in oklab, var(--gold) 78%, var(--foreground) 22%);
 }
 

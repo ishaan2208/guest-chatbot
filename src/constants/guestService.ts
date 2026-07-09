@@ -436,13 +436,14 @@ export function useGuestServiceMenu() {
         {
           type: "BOOK_TAXI",
           label: "Book a taxi",
-          kind: "REDIRECT",
+          kind: "FUNCTION",
           featured: false,
           isChargeable: false,
-          reply: "🚕 Opening taxi booking — I've let reception know as well.",
+          reply: "🚕 Our taxi desk can arrange your ride — tap below to call.",
+          // Hardcoded taxi-desk number for now; also logs a ticket so reception
+          // is aware. handleItem renders a tap-to-call contact card.
           action: (_details?: string) => {
             notifyTicket(bookingRoomId, booking as Booking, "BOOK_TAXI");
-            window.open("https://taxi.example.com", "_blank");
           },
         },
       ],

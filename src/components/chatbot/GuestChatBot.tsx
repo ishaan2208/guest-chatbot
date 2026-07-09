@@ -421,6 +421,12 @@ export default function GuestChatBot() {
           note: "Hotel protocol applies",
           tone: "urgent",
         });
+      } else if (item.type === "BOOK_TAXI") {
+        botSendContact("Tap to call our taxi desk — they'll arrange your ride.", {
+          title: "Taxi Booking",
+          number: "9084051774",
+          note: "Cab desk · tap to call",
+        });
       } else if (item.kind === "REDIRECT") {
         // Order food / taxi navigate away — a docket would be orphaned; keep the line.
         botSend(replyText, 500);
